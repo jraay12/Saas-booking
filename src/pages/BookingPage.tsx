@@ -4,6 +4,10 @@ import Button from "../component/Button";
 import { useState } from "react";
 import Search from "../component/Search";
 import ServiceCard from "../component/ServiceCard";
+import { useNavigate, useParams } from "react-router";
+/* =========================
+   TYPES
+========================= */
 
 type ContextType = {
   business: any;
@@ -12,23 +16,50 @@ type ContextType = {
   timeSlots: any;
 };
 
+/* =========================
+   MAIN PAGE
+========================= */
+
 export default function BookingPage() {
   const { business, services, staffs, timeSlots } =
     useOutletContext<ContextType>();
-
+  const navigate = useNavigate()
+  const {slug} = useParams()
   const categories = Array.from(
     new Set(services.map((item: any) => item.category)),
   );
 
   const [categoryActive, setCategoryActive] = useState(categories[0]);
   const [filterService, setFilterService] = useState<string>("");
+
   const [serviceSelected, setServiceSelected] = useState("");
   const [selectedStaff, setSelectedStaff] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
 
   const filteredService = services.filter(
     (item: any) => item.category === categoryActive,
   );
+
+  const serviceDetails = services.find(
+    (item: any) => item.id === serviceSelected,
+  );
+
+  const isServiceSelected = !!serviceSelected;
+  const isStaffSelected = !!selectedStaff;
+  const isDateSelected = !!selectedDate;
+
+  const handleSubmit = () => {
+    const payload = {
+      service: serviceSelected,
+      staff: selectedStaff,
+      date: selectedDate,
+      time: selectedTime,
+    };
+
+    sessionStorage.setItem("booking", JSON.stringify(payload))
+    navigate(`/booking/${slug}/confirmation`)
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
@@ -39,10 +70,8 @@ export default function BookingPage() {
           className="w-full h-full object-cover"
         />
 
-        {/* gradient */}
         <div className="absolute inset-0 bg-linear-to-b from-transparent to-white" />
 
-        {/* text overlay */}
         <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 z-10">
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-black">
             {business?.name}
@@ -52,7 +81,7 @@ export default function BookingPage() {
             {business?.description}
           </p>
 
-          <p className="text-xs sm:text-sm text-black max-w-2xl mt-2 sm:mt-4 font-thin flex items-center gap-1">
+          <p className="text-xs sm:text-sm text-black flex items-center gap-1 mt-2 sm:mt-4 font-thin">
             <MapPin className="w-4" />
             {business.address}
           </p>
@@ -63,7 +92,7 @@ export default function BookingPage() {
         </div>
       </div>
 
-      {/* GRID SECTION */}
+      {/* GRID */}
       <div className="w-full grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 mt-10 sm:mt-20 items-start">
         {/* LEFT */}
         <div className="w-full rounded-lg p-4">
@@ -92,27 +121,57 @@ export default function BookingPage() {
           </div>
 
           <div className="flex flex-col gap-4 mt-4">
-            {filteredService &&
-              filteredService.map((item: any) => (
-                <ServiceCard
-                  key={item.id}
-                  service={item}
-                  serviceSelected={serviceSelected}
-                  onSelect={() => setServiceSelected(item.id)}
-                />
-              ))}
+            {filteredService.map((item: any) => (
+              <ServiceCard
+                key={item.id}
+                service={item}
+                serviceSelected={serviceSelected}
+                onSelect={() => {
+                  setServiceSelected(item.id);
+
+                  // RESET DEPENDENT FIELDS
+                  setSelectedStaff("");
+                  setSelectedDate("");
+                  setSelectedTime("");
+                }}
+              />
+            ))}
           </div>
         </div>
 
         {/* RIGHT */}
-        <div className="w-full min-w-0 border border-gray-300 shadow-xl rounded-lg p-6">
+        <div className="w-full min-w-0 border border-gray-300 shadow-xl rounded-lg p-4">
           <AppointmentCard
             staffs={staffs}
             selectedStaff={selectedStaff}
             onStaffSelect={setSelectedStaff}
             onSelectDate={setSelectedDate}
             selectedDate={selectedDate}
-            availableTimes={timeSlots}
+            availableTimes={isDateSelected ? timeSlots : []}
+            onSelectTime={setSelectedTime}
+            selectedTime={selectedTime}
+            isServiceSelected={isServiceSelected}
+            isStaffSelected={isStaffSelected}
+          />
+
+          <div className="w-full border border-gray-300 mt-10" />
+
+          <div className="flex flex-col mt-10">
+            <div className="flex justify-between">
+              <p>{serviceDetails?.title}</p>
+              <p>{serviceDetails?.amount}</p>
+            </div>
+
+            <div className="flex justify-between">
+              <p>Total</p>
+              <p>{serviceDetails?.amount}</p>
+            </div>
+          </div>
+
+          <Button
+            name="Continue to details"
+            className="mt-4 w-full cursor-pointer"
+            onClick={handleSubmit}
           />
         </div>
       </div>
@@ -133,6 +192,11 @@ type AppointmentCardProps = {
   selectedDate: string;
 
   availableTimes: any[];
+  onSelectTime: (value: string) => void;
+  selectedTime: string;
+
+  isServiceSelected: boolean;
+  isStaffSelected: boolean;
 };
 
 function AppointmentCard({
@@ -144,24 +208,50 @@ function AppointmentCard({
   selectedDate,
 
   availableTimes,
+  onSelectTime,
+  selectedTime,
+
+  isServiceSelected,
+  isStaffSelected,
 }: AppointmentCardProps) {
   return (
     <div className="flex flex-col">
       <h1 className="text-xl font-medium text-black">Schedule Appointment</h1>
 
-      <StaffSection
-        staffs={staffs}
-        selectedStaff={selectedStaff}
-        onSelect={onStaffSelect}
-      />
-      <DateSection onSelectDate={onSelectDate} selectedDate={selectedDate} />
-      <AvailableTimes availableTime={availableTimes} />
+      {/* STAFF */}
+      {!isServiceSelected ? (
+        <p className="text-sm text-gray-400 mt-4">Select a service first</p>
+      ) : (
+        <StaffSection
+          staffs={staffs}
+          selectedStaff={selectedStaff}
+          onSelect={onStaffSelect}
+        />
+      )}
+
+      {/* DATE */}
+      {!isStaffSelected ? (
+        <p className="text-sm text-gray-400 mt-6">Select staff first</p>
+      ) : (
+        <DateSection onSelectDate={onSelectDate} selectedDate={selectedDate} />
+      )}
+
+      {/* TIME */}
+      {!selectedDate ? (
+        <p className="text-sm text-gray-400 mt-6">Select date first</p>
+      ) : (
+        <AvailableTimes
+          availableTime={availableTimes}
+          onSelectTime={onSelectTime}
+          selectedTime={selectedTime}
+        />
+      )}
     </div>
   );
 }
 
 /* =========================
-   STAFF SECTION
+   STAFF
 ========================= */
 
 type StaffProps = {
@@ -192,7 +282,9 @@ function StaffSection({ staffs, onSelect, selectedStaff }: StaffProps) {
                 }`}
               />
               <p
-                className={`text-xs ${isSelected ? "text-black" : "text-black/50"} `}
+                className={`text-xs ${
+                  isSelected ? "text-black" : "text-black/50"
+                }`}
               >
                 {staff.name}
               </p>
@@ -205,18 +297,20 @@ function StaffSection({ staffs, onSelect, selectedStaff }: StaffProps) {
 }
 
 /* =========================
-   DATE SECTION
+   DATE SECTION (UNCHANGED UI)
 ========================= */
+
 type DateSectionProps = {
   onSelectDate: (value: string) => void;
   selectedDate: string;
 };
+
 function DateSection({ onSelectDate, selectedDate }: DateSectionProps) {
   const getStartOfWeek = (date: Date) => {
-    const newDate = new Date(date); // avoid mutation
-    const day = newDate.getDay(); // 0 (Sun) - 6 (Sat)
+    const newDate = new Date(date);
+    const day = newDate.getDay();
 
-    const diff = newDate.getDate() - day + 1; // Monday start
+    const diff = newDate.getDate() - day + 1;
     newDate.setDate(diff);
 
     return newDate;
@@ -250,7 +344,6 @@ function DateSection({ onSelectDate, selectedDate }: DateSectionProps) {
 
   return (
     <div className="mt-6">
-      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-sm font-medium text-gray-700">
           {currentWeekStart.toLocaleDateString("en-US", {
@@ -258,24 +351,18 @@ function DateSection({ onSelectDate, selectedDate }: DateSectionProps) {
             year: "numeric",
           })}
         </h2>
+
         <div>
-          <button
-            onClick={goPrevWeek}
-            className="text-sm px-2 py-1 rounded hover:bg-gray-100 cursor-pointer"
-          >
+          <button onClick={goPrevWeek}>
             <ChevronLeft />
           </button>
 
-          <button
-            onClick={goNextWeek}
-            className="text-sm px-2 py-1 rounded hover:bg-gray-100 cursor-pointer"
-          >
+          <button onClick={goNextWeek}>
             <ChevronRight />
           </button>
         </div>
       </div>
 
-      {/* Days */}
       <div className="grid grid-cols-7 gap-2">
         {weekDays.map((day) => {
           const today = new Date();
@@ -297,12 +384,16 @@ function DateSection({ onSelectDate, selectedDate }: DateSectionProps) {
                 if (isPastDay) return;
                 onSelectDate(day.toISOString());
               }}
-              className={`flex flex-col items-center justify-center p-2 rounded-lg border transition  ${isSelectedDate ? "bg-[#3525cc] text-white" : ""}
-        ${isPastDay ? "opacity-40 cursor-not-allowed" : "cursor-pointer "}
-      `}
+              className={`flex flex-col items-center justify-center p-2 rounded-lg border transition ${
+                isSelectedDate ? "bg-[#3525cc] text-white" : ""
+              } ${
+                isPastDay ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+              }`}
             >
               <span
-                className={`text-xs text-gray-500 ${isSelectedDate ? "text-white" : ""}`}
+                className={`text-xs text-gray-500 ${
+                  isSelectedDate ? "text-white" : ""
+                }`}
               >
                 {day.toLocaleDateString("en-US", { weekday: "short" })}
               </span>
@@ -317,27 +408,40 @@ function DateSection({ onSelectDate, selectedDate }: DateSectionProps) {
 }
 
 /* =========================
-   AVAILABLE TIMES SECTION
+   TIMES
 ========================= */
+
 type AvailableTimesProps = {
   availableTime: any;
+  onSelectTime: (value: string) => void;
+  selectedTime: string;
 };
 
-function AvailableTimes({ availableTime }: AvailableTimesProps) {
-  console.log(availableTime);
-
+function AvailableTimes({
+  availableTime,
+  onSelectTime,
+  selectedTime,
+}: AvailableTimesProps) {
   return (
     <div className="mt-6">
       <h1 className="mb-2">Available Times</h1>
+
       <div className="grid grid-cols-3 gap-3">
-        {availableTime?.map((time: string, index: number) => (
-          <button
-            key={index}
-            className="border rounded-lg py-2 text-sm hover:bg-gray-100 transition"
-          >
-            {time}
-          </button>
-        ))}
+        {availableTime?.map((time: string, index: number) => {
+          const isSelected = selectedTime === time;
+
+          return (
+            <button
+              key={index}
+              className={`border rounded-lg py-2 text-sm hover:bg-gray-100 transition cursor-pointer font-medium ${
+                isSelected ? "bg-[#e7e3fa] text-[#3525cc]" : ""
+              }`}
+              onClick={() => onSelectTime(time)}
+            >
+              {time}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
