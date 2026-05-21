@@ -82,7 +82,7 @@ export const staffs = [
   {
     id: 1,
 
-    name: "John Doe",
+    name: "John",
 
     role: "Senior Barber",
 
@@ -94,7 +94,7 @@ export const staffs = [
   {
     id: 2,
 
-    name: "Jane Smith",
+    name: "Jane",
 
     role: "Hair Stylist",
 

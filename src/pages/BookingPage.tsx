@@ -9,10 +9,12 @@ type ContextType = {
   business: any;
   services: any;
   staffs: any;
+  timeSlots: any;
 };
 
 export default function BookingPage() {
-  const { business, services, staffs } = useOutletContext<ContextType>();
+  const { business, services, staffs, timeSlots } =
+    useOutletContext<ContextType>();
 
   const categories = Array.from(
     new Set(services.map((item: any) => item.category)),
@@ -62,9 +64,9 @@ export default function BookingPage() {
       </div>
 
       {/* GRID SECTION */}
-      <div className="w-full grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 mt-10 sm:mt-20">
-        {/* Left */}
-        <div className="h-60 sm:h-90 rounded-lg p-4">
+      <div className="w-full grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 mt-10 sm:mt-20 items-start">
+        {/* LEFT */}
+        <div className="w-full rounded-lg p-4">
           <div className="flex gap-4">
             {categories.map((item: any) => (
               <p
@@ -102,14 +104,15 @@ export default function BookingPage() {
           </div>
         </div>
 
-        {/* Right */}
-        <div className="h-60 sm:h-112 border border-gray-300 shadow-xl rounded-lg p-6">
+        {/* RIGHT */}
+        <div className="w-full min-w-0 border border-gray-300 shadow-xl rounded-lg p-6">
           <AppointmentCard
             staffs={staffs}
             selectedStaff={selectedStaff}
             onStaffSelect={setSelectedStaff}
             onSelectDate={setSelectedDate}
             selectedDate={selectedDate}
+            availableTimes={timeSlots}
           />
         </div>
       </div>
@@ -128,6 +131,8 @@ type AppointmentCardProps = {
 
   onSelectDate: (value: string) => void;
   selectedDate: string;
+
+  availableTimes: any[];
 };
 
 function AppointmentCard({
@@ -137,6 +142,8 @@ function AppointmentCard({
 
   onSelectDate,
   selectedDate,
+
+  availableTimes,
 }: AppointmentCardProps) {
   return (
     <div className="flex flex-col">
@@ -148,6 +155,7 @@ function AppointmentCard({
         onSelect={onStaffSelect}
       />
       <DateSection onSelectDate={onSelectDate} selectedDate={selectedDate} />
+      <AvailableTimes availableTime={availableTimes} />
     </div>
   );
 }
@@ -167,18 +175,27 @@ function StaffSection({ staffs, onSelect, selectedStaff }: StaffProps) {
     <div className="mt-6 flex flex-col">
       <h1>Select Staff</h1>
 
-      <div className="flex gap-2 mt-2">
+      <div className="flex gap-4 mt-2">
         {staffs?.map((staff) => {
           const isSelected = selectedStaff === staff.id;
 
           return (
-            <div key={staff.id} onClick={() => onSelect(staff.id)}>
+            <div
+              key={staff.id}
+              onClick={() => onSelect(staff.id)}
+              className="flex flex-col items-center"
+            >
               <img
                 src={staff.avatar}
                 className={`w-10 h-10 rounded-full cursor-pointer opacity-60 ${
                   isSelected ? "opacity-100 ring-2 ring-blue-500" : ""
                 }`}
               />
+              <p
+                className={`text-xs ${isSelected ? "text-black" : "text-black/50"} `}
+              >
+                {staff.name}
+              </p>
             </div>
           );
         })}
@@ -187,6 +204,9 @@ function StaffSection({ staffs, onSelect, selectedStaff }: StaffProps) {
   );
 }
 
+/* =========================
+   DATE SECTION
+========================= */
 type DateSectionProps = {
   onSelectDate: (value: string) => void;
   selectedDate: string;
@@ -296,7 +316,29 @@ function DateSection({ onSelectDate, selectedDate }: DateSectionProps) {
   );
 }
 
+/* =========================
+   AVAILABLE TIMES SECTION
+========================= */
+type AvailableTimesProps = {
+  availableTime: any;
+};
 
-function AvailableTime(){
+function AvailableTimes({ availableTime }: AvailableTimesProps) {
+  console.log(availableTime);
 
+  return (
+    <div className="mt-6">
+      <h1 className="mb-2">Available Times</h1>
+      <div className="grid grid-cols-3 gap-3">
+        {availableTime?.map((time: string, index: number) => (
+          <button
+            key={index}
+            className="border rounded-lg py-2 text-sm hover:bg-gray-100 transition"
+          >
+            {time}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }

@@ -1,8 +1,8 @@
 import { Outlet } from "react-router";
 import PublicHeader from "../component/PublicHeader";
-import { business } from "../data/mockdata";
-import { services } from "../data/mockdata";
-import { staffs } from "../data/mockdata";
+import { business, services, staffs, timeSlots } from "../data/mockdata";
+
+
 export default function PublicLayout() {
 
   return (
@@ -11,7 +11,7 @@ export default function PublicLayout() {
       <PublicHeader data={business}/>
     
       <main>
-        <Outlet context={{business, services, staffs}}/>
+        <Outlet context={{business, services, staffs, timeSlots}}/>
       </main>
 
     </div>
