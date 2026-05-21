@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router";
 import PublicLayout from "./layout/PublicLayout";
 import BookingPage from "./pages/BookingPage";
 import StaffPage from "./pages/StaffPage";
+import BookingConfirmation from "./pages/BookingConfirmation";
 function App() {
   return (
     <>
@@ -10,6 +11,7 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/service/:slug" element={<BookingPage />} />
           <Route path="/staff/:slug" element={<StaffPage />} />
+          <Route path="/booking/:slug/confirmation" element={<BookingConfirmation />} />
         </Route>
       </Routes>
     </>
