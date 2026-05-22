@@ -86,7 +86,7 @@ export const staffs = [
     specialties: ["Haircut", "Beard Styling"],
     description:
       "",
-    avatar: "https://i.pravatar.cc/150?img=1",
+    avatar: "",
   },
   {
     id: 2,

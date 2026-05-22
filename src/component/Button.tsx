@@ -4,7 +4,8 @@ type Props = {
   name: string;
   onClick?: () => void;
   className?: string;
-  icon?: LucideIcon; // ✅ optional
+  icon?: LucideIcon;
+  variant?: "primary" | "danger" | "edit";
 };
 
 const Button = ({
@@ -12,15 +13,23 @@ const Button = ({
   onClick,
   className,
   icon: Icon,
+  variant = "primary",
 }: Props) => {
+  const base =
+    "text-sm px-3 py-2 rounded-md font-medium cursor-pointer flex items-center justify-center gap-2";
+
+  const styles = {
+    primary: "bg-[#3525cc] text-white",
+    edit: "bg-transparent text-black",
+    danger: "border border-red-700 text-red-700",
+  };
+
   return (
     <button
-      className={`text-white text-sm px-3 py-2 rounded-md font-medium cursor-pointer bg-[#3525cc] flex items-center justify-center gap-2 ${className}`}
+      className={`${base} ${styles[variant]} ${className}`}
       onClick={onClick}
     >
-      {/* OPTIONAL ICON */}
       {Icon && <Icon size={16} />}
-
       <span>{name}</span>
     </button>
   );

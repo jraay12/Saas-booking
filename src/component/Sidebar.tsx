@@ -27,7 +27,7 @@ const Sidebar = ({ data }: Props) => {
                 transition-all duration-200 cursor-pointer
                 ${
                   isActive
-                    ? "bg-[#edeaff] text-[#3525cc] font-medium"
+                    ? "bg-[#edeaff] text-[#3525cc] font-medium border-r-5"
                     : "text-black/60 hover:bg-gray-100"
                 }
               `
