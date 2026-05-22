@@ -1,11 +1,11 @@
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { useOutletContext } from "react-router";
-import Button from "../component/Button";
+import Button from "../../component/Button";
 import { useState } from "react";
-import Search from "../component/Search";
-import ServiceCard from "../component/ServiceCard";
+import Search from "../../component/Search";
+import ServiceCard from "../../component/ServiceCard";
 import { useNavigate, useParams } from "react-router";
-import NoService from "../component/NoService";
+import NoService from "../../component/NoService";
 /* =========================
    TYPES
 ========================= */
@@ -306,9 +306,7 @@ function StaffSection({ staffs, onSelect, selectedStaff }: StaffProps) {
       {/* EMPTY STATE */}
       {!hasStaff ? (
         <div className="flex flex-col items-center justify-center py-6 text-center">
-          <p className="text-sm text-black/50">
-            No staff available yet
-          </p>
+          <p className="text-sm text-black/50">No staff available yet</p>
           <p className="text-xs text-black/40 mt-1">
             The business has not added any staff members yet.
           </p>

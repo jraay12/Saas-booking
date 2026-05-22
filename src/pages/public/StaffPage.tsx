@@ -1,7 +1,7 @@
 import { MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { useOutletContext } from "react-router";
 import { useRef } from "react";
-import StaffCards from "../component/StaffCards";
+import StaffCards from "../../component/StaffCards";
 
 type ContextType = {
   business: any;
@@ -45,9 +45,7 @@ const StaffPage = () => {
 
       {/* STAFF SECTION */}
       <div className="max-w-7xl mx-auto mt-10 pb-10 px-4">
-        <h1 className="text-4xl font-semibold mb-6">
-          Our Specialists
-        </h1>
+        <h1 className="text-4xl font-semibold mb-6">Our Specialists</h1>
 
         {/* ARROWS (only show if more than 4) */}
         {staffs?.length > 4 && (
@@ -84,7 +82,7 @@ const StaffPage = () => {
               <StaffCards
                 name={item.name}
                 role={item.role}
-                image={item.avatar}   // FIXED: was image → avatar
+                image={item.avatar} // FIXED: was image → avatar
                 description={item.description}
               />
             </div>

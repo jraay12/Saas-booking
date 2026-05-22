@@ -10,9 +10,9 @@ import {
 } from "lucide-react";
 import { Navigate, useParams, useNavigate } from "react-router";
 import { useState } from "react";
-import Input from "../component/Input";
-import Button from "../component/Button";
-import { services, staffs } from "../data/mockdata";
+import Input from "../../component/Input";
+import Button from "../../component/Button";
+import { services, staffs } from "../../data/mockdata";
 
 const BookingConfirmation = () => {
   const booking = JSON.parse(sessionStorage.getItem("booking") || "null");
@@ -58,7 +58,7 @@ const BookingConfirmation = () => {
   };
 
   const serviceDetails = services.find((item) => item.id === booking.service);
-  const staffDetails = staffs.find((item) => item.id === booking.staff)
+  const staffDetails = staffs.find((item) => item.id === booking.staff);
 
   const handleBackToSchedule = () => {
     navigate(-1);
