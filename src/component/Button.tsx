@@ -1,16 +1,27 @@
+import type { LucideIcon } from "lucide-react";
+
 type Props = {
   name: string;
   onClick?: () => void;
-  className?: string
+  className?: string;
+  icon?: LucideIcon; // ✅ optional
 };
 
-const Button = (props: Props) => {
+const Button = ({
+  name,
+  onClick,
+  className,
+  icon: Icon,
+}: Props) => {
   return (
     <button
-      className={`text-white text-sm px-2 py-2 rounded-md font-medium cursor-pointer bg-[#3525cc] ${props.className}`}
-      onClick={props.onClick}
+      className={`text-white text-sm px-3 py-2 rounded-md font-medium cursor-pointer bg-[#3525cc] flex items-center justify-center gap-2 ${className}`}
+      onClick={onClick}
     >
-      {props.name}
+      {/* OPTIONAL ICON */}
+      {Icon && <Icon size={16} />}
+
+      <span>{name}</span>
     </button>
   );
 };
