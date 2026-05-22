@@ -9,6 +9,8 @@ import {
   Settings,
 } from "lucide-react";
 
+import AdminHeader from "../component/AdminHeader";
+
 const menu = [
   {
     label: "Dashboard",
@@ -41,14 +43,20 @@ export default function AdminLayout() {
   return (
     <div className="min-h-screen bg-[#f2f5f7] grid grid-cols-1 md:grid-cols-[260px_1fr]">
       {/* SIDEBAR */}
-      <aside className="bg-white border-r border-gray-200">
+      <aside className="bg-white border-r border-gray-200 h-screen sticky top-0">
         <Sidebar data={menu} />
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main className="p-4 sm:p-6">
-        <Outlet />
-      </main>
+      {/* RIGHT CONTENT */}
+      <div className="flex flex-col min-h-screen">
+        {/* HEADER */}
+        <AdminHeader />
+
+        {/* PAGE CONTENT */}
+        <main className="flex-1 p-4 sm:p-6 overflow-auto">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
