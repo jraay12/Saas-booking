@@ -8,7 +8,7 @@ export default function PublicLayout() {
   return (
     <div className="min-h-screen bg-[#f2f5f7]">
 
-      <PublicHeader data={business}/>
+      <PublicHeader data={business} slug="123" />
     
       <main >
         <Outlet context={{business, services, staffs, timeSlots}}/>

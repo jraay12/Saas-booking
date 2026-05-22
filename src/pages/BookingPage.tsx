@@ -5,6 +5,7 @@ import { useState } from "react";
 import Search from "../component/Search";
 import ServiceCard from "../component/ServiceCard";
 import { useNavigate, useParams } from "react-router";
+import NoService from "../component/NoService";
 /* =========================
    TYPES
 ========================= */
@@ -96,91 +97,101 @@ export default function BookingPage() {
 
       {/* GRID */}
       <div className="w-full grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 mt-10 sm:mt-20 items-start">
-        {/* LEFT */}
-        <div className="w-full rounded-lg p-4">
-          <div className="flex gap-4">
-            {categories.map((item: any) => (
-              <p
-                key={item}
-                className={`cursor-pointer ${
-                  item === categoryActive
-                    ? "border-b-2 border-[#3525cc] text-[#3525cc]"
-                    : ""
-                }`}
-                onClick={() => setCategoryActive(item)}
-              >
-                {item}
-              </p>
-            ))}
+        {!services || services.length === 0 ? (
+          <div className="col-span-full flex items-center justify-center min-h-[60vh]">
+            <NoService />
           </div>
-
-          <div className="mt-4">
-            <Search
-              placeHolder="Search services..."
-              value={filterService ?? ""}
-              onChange={setFilterService}
-            />
-          </div>
-
-          <div className="flex flex-col gap-4 mt-4">
-            {filteredService.map((item: any) => (
-              <ServiceCard
-                key={item.id}
-                service={item}
-                serviceSelected={serviceSelected}
-                onSelect={() => {
-                  setServiceSelected(item.id);
-
-                  // RESET DEPENDENT FIELDS
-                  setSelectedStaff("");
-                  setSelectedDate("");
-                  setSelectedTime("");
-                }}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* RIGHT */}
-        <div className="w-full min-w-0 border border-gray-300 shadow-xl rounded-lg p-4">
-          <AppointmentCard
-            staffs={staffs}
-            selectedStaff={selectedStaff}
-            onStaffSelect={setSelectedStaff}
-            onSelectDate={setSelectedDate}
-            selectedDate={selectedDate}
-            availableTimes={isDateSelected ? timeSlots : []}
-            onSelectTime={setSelectedTime}
-            selectedTime={selectedTime}
-            isServiceSelected={isServiceSelected}
-            isStaffSelected={isStaffSelected}
-          />
-
-          <div className="w-full border border-gray-300 mt-10" />
-
-          {serviceSelected && selectedStaff && selectedDate && selectedTime && (
-            <>
-
-              <div className="flex flex-col mt-10">
-                <div className="flex justify-between">
-                  <p>{serviceDetails?.title}</p>
-                  <p>{serviceDetails?.amount}</p>
-                </div>
-
-                <div className="flex justify-between">
-                  <p>Total</p>
-                  <p>{serviceDetails?.amount}</p>
-                </div>
+        ) : (
+          <>
+            {/* LEFT */}
+            <div className="w-full rounded-lg p-4">
+              <div className="flex gap-4">
+                {categories.map((item: any) => (
+                  <p
+                    key={item}
+                    className={`cursor-pointer ${
+                      item === categoryActive
+                        ? "border-b-2 border-[#3525cc] text-[#3525cc]"
+                        : ""
+                    }`}
+                    onClick={() => setCategoryActive(item)}
+                  >
+                    {item}
+                  </p>
+                ))}
               </div>
 
-              <Button
-                name="Continue to details"
-                className="mt-4 w-full cursor-pointer"
-                onClick={handleSubmit}
+              <div className="mt-4">
+                <Search
+                  placeHolder="Search services..."
+                  value={filterService ?? ""}
+                  onChange={setFilterService}
+                />
+              </div>
+
+              <div className="flex flex-col gap-4 mt-4">
+                {filteredService.map((item: any) => (
+                  <ServiceCard
+                    key={item.id}
+                    service={item}
+                    serviceSelected={serviceSelected}
+                    onSelect={() => {
+                      setServiceSelected(item.id);
+
+                      // RESET DEPENDENT FIELDS
+                      setSelectedStaff("");
+                      setSelectedDate("");
+                      setSelectedTime("");
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT */}
+            <div className="w-full min-w-0 border border-gray-300 shadow-xl rounded-lg p-4">
+              <AppointmentCard
+                staffs={staffs}
+                selectedStaff={selectedStaff}
+                onStaffSelect={setSelectedStaff}
+                onSelectDate={setSelectedDate}
+                selectedDate={selectedDate}
+                availableTimes={isDateSelected ? timeSlots : []}
+                onSelectTime={setSelectedTime}
+                selectedTime={selectedTime}
+                isServiceSelected={isServiceSelected}
+                isStaffSelected={isStaffSelected}
               />
-            </>
-          )}
-        </div>
+
+              <div className="w-full border border-gray-300 mt-10" />
+
+              {serviceSelected &&
+                selectedStaff &&
+                selectedDate &&
+                selectedTime && (
+                  <>
+                    <div className="flex flex-col mt-10">
+                      <div className="flex justify-between">
+                        <p>{serviceDetails?.title}</p>
+                        <p>{serviceDetails?.amount}</p>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <p>Total</p>
+                        <p>{serviceDetails?.amount}</p>
+                      </div>
+                    </div>
+
+                    <Button
+                      name="Continue to details"
+                      className="mt-4 w-full cursor-pointer"
+                      onClick={handleSubmit}
+                    />
+                  </>
+                )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -238,14 +249,14 @@ function AppointmentCard({
 
       {/* DATE */}
       {!isStaffSelected ? (
-        <p className="text-sm text-gray-400 mt-6">Select staff first</p>
+        <p className="text-sm text-gray-400 mt-6"></p>
       ) : (
         <DateSection onSelectDate={onSelectDate} selectedDate={selectedDate} />
       )}
 
       {/* TIME */}
       {!selectedDate ? (
-        <p className="text-sm text-gray-400 mt-6">Select date first</p>
+        <p className="text-sm text-gray-400 mt-6"></p>
       ) : (
         <AvailableTimes
           availableTime={availableTimes}
@@ -268,41 +279,100 @@ type StaffProps = {
 };
 
 function StaffSection({ staffs, onSelect, selectedStaff }: StaffProps) {
+  const [page, setPage] = useState(0);
+
+  const ITEMS_PER_PAGE = 7;
+
+  // ✅ Fallback check
+  const hasStaff = staffs && staffs.length > 0;
+
+  const totalPages = Math.ceil((staffs?.length || 0) / ITEMS_PER_PAGE);
+
+  const start = page * ITEMS_PER_PAGE;
+  const visibleStaffs = staffs?.slice(start, start + ITEMS_PER_PAGE);
+
+  const next = () => {
+    if (page < totalPages - 1) setPage(page + 1);
+  };
+
+  const back = () => {
+    if (page > 0) setPage(page - 1);
+  };
+
   return (
     <div className="mt-6 flex flex-col">
-      <h1>Select Staff</h1>
+      <h1 className="font-medium text-xs">Select Staff</h1>
 
-      <div className="flex gap-4 mt-2">
-        {staffs?.map((staff) => {
-          const isSelected = selectedStaff === staff.id;
-
-          return (
-            <div
-              key={staff.id}
-              onClick={() => onSelect(staff.id)}
-              className="flex flex-col items-center"
-            >
-              <img
-                src={staff.avatar}
-                className={`w-10 h-10 rounded-full cursor-pointer opacity-60 ${
-                  isSelected ? "opacity-100 ring-2 ring-blue-500" : ""
-                }`}
-              />
-              <p
-                className={`text-xs ${
-                  isSelected ? "text-black" : "text-black/50"
-                }`}
+      {/* EMPTY STATE */}
+      {!hasStaff ? (
+        <div className="flex flex-col items-center justify-center py-6 text-center">
+          <p className="text-sm text-black/50">
+            No staff available yet
+          </p>
+          <p className="text-xs text-black/40 mt-1">
+            The business has not added any staff members yet.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* STAFF LIST */}
+          <div className="flex items-center gap-2 mt-2">
+            {/* BACK BUTTON */}
+            {staffs?.length > 7 && (
+              <button
+                onClick={back}
+                disabled={page === 0}
+                className="p-1 disabled:opacity-30"
               >
-                {staff.name}
-              </p>
+                <ChevronLeft size={18} />
+              </button>
+            )}
+
+            {/* STAFF ITEMS */}
+            <div className="flex gap-4">
+              {visibleStaffs?.map((staff) => {
+                const isSelected = selectedStaff === staff.id;
+
+                return (
+                  <div
+                    key={staff.id}
+                    onClick={() => onSelect(staff.id)}
+                    className="flex flex-col items-center"
+                  >
+                    <img
+                      src={staff.avatar}
+                      className={`w-10 h-10 rounded-full cursor-pointer opacity-60 ${
+                        isSelected ? "opacity-100 ring-2 ring-blue-500" : ""
+                      }`}
+                    />
+                    <p
+                      className={`text-xs ${
+                        isSelected ? "text-black" : "text-black/50"
+                      }`}
+                    >
+                      {staff.name}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
-      </div>
+
+            {/* NEXT BUTTON */}
+            {staffs?.length > 7 && (
+              <button
+                onClick={next}
+                disabled={page === totalPages - 1}
+                className="p-1 disabled:opacity-30"
+              >
+                <ChevronRight size={18} />
+              </button>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
-
 /* =========================
    DATE SECTION (UNCHANGED UI)
 ========================= */
@@ -431,7 +501,7 @@ function AvailableTimes({
 }: AvailableTimesProps) {
   return (
     <div className="mt-6">
-      <h1 className="mb-2">Available Times</h1>
+      <h1 className="mb-2 text-xs font-medium">Available Times</h1>
 
       <div className="grid grid-cols-3 gap-3">
         {availableTime?.map((time: string, index: number) => {
