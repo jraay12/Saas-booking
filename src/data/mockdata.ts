@@ -49,7 +49,7 @@ export const business = {
 
 export const services = [
   {
-    id: 1,
+    id: "1",
     title: "Haircut",
     description:
       "Professional haircut tailored to your preferred style and face shape.",
@@ -59,7 +59,7 @@ export const services = [
   },
 
   {
-    id: 2,
+    id: "2",
     title: "Hair Coloring",
     description:
       "Full hair coloring service using premium salon-grade products.",
@@ -69,7 +69,7 @@ export const services = [
   },
 
   {
-    id: 3,
+    id: "3",
     title: "Beard Trim",
     description: "Clean and precise beard shaping with detailed finishing.",
     amount: 300,

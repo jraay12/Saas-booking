@@ -31,7 +31,7 @@ const Input = ({
         onChange={onChange}
         placeholder={placeholder}
         disabled={disabled}
-        className={`w-full rounded-lg border bg-[#fcf7ff] border-gray-300 px-4 focus:border-gray-300 focus:ring-gray-300 py-2 outline-none transition  ${className}`}
+        className={`w-full rounded-lg border bg-[#fcf7ff] text-sm border-gray-300 px-4 focus:border-gray-300 focus:ring-gray-300 py-2 outline-none transition  ${className}`}
       />
     </div>
   );

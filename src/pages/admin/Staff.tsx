@@ -2,12 +2,14 @@ import { useState } from "react";
 import Button from "../../component/Button";
 import { Edit, Filter, Trash, UserPlus } from "lucide-react";
 import { staffs as mockStaffs } from "../../data/mockdata";
+import CreateStaffModal from "../../component/CreateStaffModal";
 
 /* =========================
    MAIN PAGE
 ========================= */
 const Staff = () => {
   const [filterRole, setFilterRole] = useState("All");
+  const [createStaffModal, setCreateStaffModal] = useState(false);
 
   // ✅ FILTER LOGIC
   const filteredStaff =
@@ -26,7 +28,12 @@ const Staff = () => {
           </p>
         </div>
 
-        <Button name="Add Staff" icon={UserPlus} className="w-40 max-h-10" />
+        <Button
+          name="Add Staff"
+          icon={UserPlus}
+          className="w-40 max-h-10"
+          onClick={() => setCreateStaffModal(true)}
+        />
       </div>
 
       {/* FILTER */}
@@ -43,6 +50,11 @@ const Staff = () => {
           <StaffCards key={item.id} data={item} />
         ))}
       </div>
+
+      <CreateStaffModal
+        onClose={() => setCreateStaffModal(false)}
+        open={createStaffModal}
+      />
     </div>
   );
 };
@@ -148,8 +160,13 @@ function StaffCards({ data }: StaffCardsProps) {
 
       {/* BUTTON (always bottom aligned) */}
       <div className="mt-4 flex justify-between gap-4">
-        <Button name="Edit" className="w-full h-8" icon={Edit} variant="edit"/>
-        <Button name="Delete" className="w-full h-8 " icon={Trash} variant="danger" />
+        <Button name="Edit" className="w-full h-8" icon={Edit} variant="edit" />
+        <Button
+          name="Delete"
+          className="w-full h-8 "
+          icon={Trash}
+          variant="danger"
+        />
       </div>
     </div>
   );

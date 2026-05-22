@@ -4,9 +4,10 @@ type Props = {
   onChange: (value: string) => void;
   value: string;
   placeHolder?: string;
+  className? : string
 };
 
-const Search = ({ value, onChange, placeHolder }: Props) => {
+const Search = ({ value, onChange, placeHolder, className }: Props) => {
   return (
     <div className="relative w-full">
       {/* icon */}
@@ -18,7 +19,7 @@ const Search = ({ value, onChange, placeHolder }: Props) => {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeHolder}
-        className="w-full pl-10 pr-4 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black/20"
+        className={`w-full pl-10 pr-4 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black/20 ${className}`}
       />
     </div>
   );
