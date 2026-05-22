@@ -23,8 +23,8 @@ type ContextType = {
 export default function BookingPage() {
   const { business, services, staffs, timeSlots } =
     useOutletContext<ContextType>();
-  const navigate = useNavigate()
-  const {slug} = useParams()
+  const navigate = useNavigate();
+  const { slug } = useParams();
   const categories = Array.from(
     new Set(services.map((item: any) => item.category)),
   );
@@ -55,10 +55,12 @@ export default function BookingPage() {
       staff: selectedStaff,
       date: selectedDate,
       time: selectedTime,
+      totalPrice: serviceDetails?.amount,
     };
+    console.log(payload);
 
-    sessionStorage.setItem("booking", JSON.stringify(payload))
-    navigate(`/booking/${slug}/confirmation`)
+    sessionStorage.setItem("booking", JSON.stringify(payload));
+    navigate(`/booking/${slug}/confirmation`);
   };
 
   return (
@@ -156,23 +158,28 @@ export default function BookingPage() {
 
           <div className="w-full border border-gray-300 mt-10" />
 
-          <div className="flex flex-col mt-10">
-            <div className="flex justify-between">
-              <p>{serviceDetails?.title}</p>
-              <p>{serviceDetails?.amount}</p>
-            </div>
+          {serviceSelected && selectedStaff && selectedDate && selectedTime && (
+            <>
 
-            <div className="flex justify-between">
-              <p>Total</p>
-              <p>{serviceDetails?.amount}</p>
-            </div>
-          </div>
+              <div className="flex flex-col mt-10">
+                <div className="flex justify-between">
+                  <p>{serviceDetails?.title}</p>
+                  <p>{serviceDetails?.amount}</p>
+                </div>
 
-          <Button
-            name="Continue to details"
-            className="mt-4 w-full cursor-pointer"
-            onClick={handleSubmit}
-          />
+                <div className="flex justify-between">
+                  <p>Total</p>
+                  <p>{serviceDetails?.amount}</p>
+                </div>
+              </div>
+
+              <Button
+                name="Continue to details"
+                className="mt-4 w-full cursor-pointer"
+                onClick={handleSubmit}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>

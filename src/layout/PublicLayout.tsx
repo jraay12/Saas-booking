@@ -6,11 +6,11 @@ import { business, services, staffs, timeSlots } from "../data/mockdata";
 export default function PublicLayout() {
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#f2f5f7]">
 
       <PublicHeader data={business}/>
     
-      <main>
+      <main >
         <Outlet context={{business, services, staffs, timeSlots}}/>
       </main>
 
