@@ -41,7 +41,7 @@ const menu = [
 
 export default function AdminLayout() {
   return (
-    <div className="min-h-screen bg-white grid grid-cols-1 md:grid-cols-[260px_1fr]">
+    <div className="min-h-screen bg-white grid grid-cols-1 md:grid-cols-[260px_1fr] overflow-x-hidden">
       {/* SIDEBAR */}
       <aside className="hidden md:block bg-white border-r border-gray-200 h-screen sticky top-0">
         <Sidebar data={menu} />
