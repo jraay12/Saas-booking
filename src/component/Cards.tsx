@@ -48,7 +48,7 @@ const Cards = ({ variant, value, label }: Props) => {
 
   return (
     <div
-      className={`md:max-w-70 min-h-30 p-4 shadow-sm border border-gray-200 bg-white border-l-2 rounded-lg ${config.className}`}
+      className={`md:max-w-70 min-h-30 p-4 shadow-sm   bg-white border-l-4 rounded-lg ${config.className}`}
     >
       <div className="flex justify-between items-center">
         <h1 className="uppercase text-xs font-medium opacity-80 text-black">
