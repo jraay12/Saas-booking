@@ -76,6 +76,7 @@ export const services = [
     minutes: 20,
     category: "Grooming",
   },
+  
 ];
 
 export const staffs = [
