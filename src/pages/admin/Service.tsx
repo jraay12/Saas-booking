@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Banknote, Clock, Plus } from "lucide-react";
 import Button from "../../component/Button";
 import { services } from "../../data/mockdata";
+import CreateServiceModal from "../../component/CreateServiceModal";
 
 const Service = () => {
+  const [createServiceModal, setCreateServiceModal] = useState(false)
   const categories = [
     "All",
     ...Array.from(
@@ -31,8 +33,6 @@ const Service = () => {
           (item: any) =>
             item.category === selectedCategory
         );
-
-  console.log(filteredServices)
 
   // TOGGLE ACTIVE / INACTIVE
   const handleToggle = (id: number) => {
@@ -68,6 +68,7 @@ const Service = () => {
           icon={Plus}
           name="Add Service"
           className="max-h-10 max-w-max text-sm"
+          onClick={() => setCreateServiceModal(true)}
         />
       </div>
 
@@ -90,6 +91,7 @@ const Service = () => {
           />
         ))}
       </div>
+      <CreateServiceModal onClose={() => setCreateServiceModal(false)} open={createServiceModal}/>
     </div>
   );
 };
