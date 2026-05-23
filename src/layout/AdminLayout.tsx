@@ -41,7 +41,7 @@ const menu = [
 
 export default function AdminLayout() {
   return (
-    <div className="min-h-screen bg-white grid grid-cols-1 md:grid-cols-[260px_1fr] overflow-x-hidden">
+    <div className="min-h-screen bg-[#f5f5fa] grid grid-cols-1 md:grid-cols-[260px_1fr] ">
       {/* SIDEBAR */}
       <aside className="hidden md:block bg-white border-r border-gray-200 h-screen sticky top-0">
         <Sidebar data={menu} />
@@ -53,7 +53,7 @@ export default function AdminLayout() {
         {/* <AdminHeader /> */}
 
         {/* PAGE CONTENT */}
-        <main className="flex-1 p-4 sm:p-6 overflow-auto">
+        <main className="flex-1 p-4 sm:p-6 ">
           <Outlet />
         </main>
       </div>

@@ -9,6 +9,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import Service from "./pages/admin/Service";
 import Bookings from "./pages/admin/Bookings";
 import Staff from "./pages/admin/Staff";
+import Settings from "./pages/admin/Settings";
 function App() {
   return (
     <>
@@ -27,7 +28,7 @@ function App() {
           <Route path="/admin/services" element={<Service />} />
           <Route path="/admin/bookings" element={<Bookings />} />
           <Route path="/admin/staff" element={<Staff />} />
-          <Route path="/admin/settings" element={<Staff />} />
+          <Route path="/admin/settings" element={<Settings />} />
         </Route>
       </Routes>
     </>
