@@ -3,6 +3,7 @@ import Button from "../../component/Button";
 import { Edit, Filter, Trash, UserPlus } from "lucide-react";
 import { staffs as mockStaffs } from "../../data/mockdata";
 import CreateStaffModal from "../../component/CreateStaffModal";
+import DeleteModal from "../../component/DeleteModal";
 
 /* =========================
    MAIN PAGE
@@ -10,6 +11,8 @@ import CreateStaffModal from "../../component/CreateStaffModal";
 const Staff = () => {
   const [filterRole, setFilterRole] = useState("All");
   const [createStaffModal, setCreateStaffModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
 
   // ✅ FILTER LOGIC
   const filteredStaff =
@@ -47,7 +50,14 @@ const Staff = () => {
 
       <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
         {filteredStaff.map((item) => (
-          <StaffCards key={item.id} data={item} />
+          <StaffCards
+            key={item.id}
+            data={item}
+            onDelete={() => {
+              setDeleteModal(true);
+              setSelectedStaff(item);
+            }}
+          />
         ))}
       </div>
 
@@ -55,6 +65,7 @@ const Staff = () => {
         onClose={() => setCreateStaffModal(false)}
         open={createStaffModal}
       />
+      <DeleteModal onClose={() => setDeleteModal(false)} open={deleteModal} staff={selectedStaff}/>
     </div>
   );
 };
@@ -128,9 +139,10 @@ type Staff = {
 
 type StaffCardsProps = {
   data: Staff;
+  onDelete: () => void;
 };
 
-function StaffCards({ data }: StaffCardsProps) {
+function StaffCards({ data, onDelete }: StaffCardsProps) {
   return (
     <div className="border min-h-70 md:max-w-60 bg-[#fcf7ff] rounded-2xl border-gray-300 p-4 flex flex-col">
       {/* TOP SECTION */}
@@ -166,6 +178,7 @@ function StaffCards({ data }: StaffCardsProps) {
           className="w-full h-8 "
           icon={Trash}
           variant="danger"
+          onClick={onDelete}
         />
       </div>
     </div>
