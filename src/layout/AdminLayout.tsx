@@ -18,14 +18,14 @@ const menu = [
     icon: LayoutDashboard,
   },
   {
-    label: "Services",
-    path: "/admin/services",
-    icon: BriefcaseBusiness,
-  },
-  {
     label: "Staff",
     path: "/admin/staff",
     icon: Users,
+  },
+  {
+    label: "Services",
+    path: "/admin/services",
+    icon: BriefcaseBusiness,
   },
   {
     label: "Bookings",
