@@ -50,7 +50,7 @@ export default function AdminLayout() {
       {/* RIGHT CONTENT */}
       <div className="flex flex-col min-h-screen ">
         {/* HEADER */}
-        <AdminHeader />
+        {/* <AdminHeader /> */}
 
         {/* PAGE CONTENT */}
         <main className="flex-1 p-4 sm:p-6 overflow-auto">
