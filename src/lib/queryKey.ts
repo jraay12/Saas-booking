@@ -1,14 +1,38 @@
 export const queryKeys = {
-  services: ["services"],
-  service: (id: string) => ["service", id],
+  services: (business_id: string) => [
+    "services",
+    business_id,
+  ],
 
-  staffs: ["staffs"],
-  staff: (id: string) => ["staff", id],
+  service: (
+    business_id: string,
+    id: string,
+  ) => ["service", business_id, id],
 
-  bookings: ["bookings"],
-  booking: (id: string) => ["booking", id],
+  staffs: (business_id: string) => [
+    "staffs",
+    business_id,
+  ],
 
-  memberships: ["memberships"],
+  staff: (
+    business_id: string,
+    id: string,
+  ) => ["staff", business_id, id],
+
+  bookings: (business_id: string) => [
+    "bookings",
+    business_id,
+  ],
+
+  booking: (
+    business_id: string,
+    id: string,
+  ) => ["booking", business_id, id],
+
+  memberships: (business_id: string) => [
+    "memberships",
+    business_id,
+  ],
 
   businesses: ["businesses"],
 };

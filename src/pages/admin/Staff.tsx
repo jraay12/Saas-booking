@@ -11,6 +11,7 @@ import Button from "../../component/Button";
 import CreateStaffModal from "../../component/CreateStaffModal";
 import DeleteModal from "../../component/DeleteModal";
 import { useGetStaffMembers } from "../../features/staff/staff.hook";
+import { getBusinessId } from "../../lib/decoder";
 
 /* =========================
    TYPES
@@ -109,6 +110,7 @@ const Staff = () => {
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
 
   const { data: response } = useGetStaffMembers();
+  const businessId = getBusinessId()
 
   const staffs: StaffMember[] = response ?? [];
 

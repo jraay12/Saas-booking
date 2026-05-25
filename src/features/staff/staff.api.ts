@@ -9,3 +9,9 @@ export const getStaffMembers = async () => {
   const response = await api.get("/membership/");
   return response.data.data;
 };
+
+export const deleteMembershipStaff = async (user_id: string) => {
+  const response = await api.delete(`/membership/${user_id}`);
+
+  return response.data.data;
+};

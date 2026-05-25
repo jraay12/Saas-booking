@@ -1,14 +1,23 @@
 import { TriangleAlert, X } from "lucide-react";
 import Button from "./Button";
-
+import { useDeleteMembershipStaff } from "../features/staff/staff.hook";
 type Props = {
   onClose: () => void;
   open: boolean;
-  staff: any
+  staff: any;
 };
 
 const DeleteModal = ({ onClose, open, staff }: Props) => {
-  console.log(staff)
+  const deleteMutation = useDeleteMembershipStaff();
+
+  const handleDelete = () => {
+    deleteMutation.mutate(staff?.user_id, {
+      onSuccess: () => {
+        onClose();
+      },
+    });
+  };
+
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center p-2 transition-all duration-300 ${
@@ -32,9 +41,7 @@ const DeleteModal = ({ onClose, open, staff }: Props) => {
         }`}
       >
         <div className="flex justify-between items-center">
-          <h1 className="font-medium text-lg">
-            Delete Staff Member?
-          </h1>
+          <h1 className="font-medium text-lg">Delete Staff Member?</h1>
 
           <button
             onClick={onClose}
@@ -51,11 +58,8 @@ const DeleteModal = ({ onClose, open, staff }: Props) => {
 
           <p className="text-justify text-sm">
             Are you sure you want to delete{" "}
-            <span className="font-bold">
-              {staff?.name}
-            </span>
-            ? This action cannot be undone and will remove
-            them from all assigned services.
+            <span className="font-bold">{staff?.name}</span>? This action cannot
+            be undone and will remove them from all assigned services.
           </p>
         </div>
 
@@ -71,6 +75,7 @@ const DeleteModal = ({ onClose, open, staff }: Props) => {
             name="Delete Member"
             variant="danger"
             className="bg-red-800 text-white text-xs"
+            onClick={() => handleDelete()}
           />
         </div>
       </div>
