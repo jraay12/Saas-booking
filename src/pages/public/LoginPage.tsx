@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, Link } from "react-router";
 import { loginSchema, type LoginDTO } from "../../schema/auth";
 import { Eye, EyeOff } from "lucide-react";
+import { useLogin } from "../../features/auth/auth.hook";
 
 // ── Animated canvas background (light theme) ─────────────────────────────────
 
@@ -25,8 +26,10 @@ const OrbCanvas = () => {
     window.addEventListener("resize", resize);
 
     type Orb = {
-      x: number; y: number;
-      vx: number; vy: number;
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
       r: number;
       color: string;
       opacity: number;
@@ -34,12 +37,12 @@ const OrbCanvas = () => {
 
     // Light palette: soft violets, brand blue tints, and the #eae6f5 accent
     const palette = [
-      "rgba(234,230,245,",  // #eae6f5 lavender
-      "rgba(44,44,219,",    // brand blue
-      "rgba(200,190,240,",  // soft violet
-      "rgba(44,44,219,",    // brand blue
-      "rgba(220,210,255,",  // pale purple
-      "rgba(180,170,230,",  // muted lavender
+      "rgba(234,230,245,", // #eae6f5 lavender
+      "rgba(44,44,219,", // brand blue
+      "rgba(200,190,240,", // soft violet
+      "rgba(44,44,219,", // brand blue
+      "rgba(220,210,255,", // pale purple
+      "rgba(180,170,230,", // muted lavender
     ];
 
     const orbs: Orb[] = Array.from({ length: 7 }, (_, i) => ({
@@ -61,7 +64,14 @@ const OrbCanvas = () => {
       ctx.fillRect(0, 0, W, H);
 
       for (const orb of orbs) {
-        const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r);
+        const grad = ctx.createRadialGradient(
+          orb.x,
+          orb.y,
+          0,
+          orb.x,
+          orb.y,
+          orb.r,
+        );
         grad.addColorStop(0, orb.color + orb.opacity + ")");
         grad.addColorStop(1, orb.color + "0)");
         ctx.beginPath();
@@ -127,11 +137,16 @@ const LoginPage = () => {
     resolver: zodResolver(loginSchema),
   });
 
+  const loginMutation = useLogin();
+
   const onSubmit = async (data: LoginDTO) => {
     try {
-      // TODO: replace with useLogin mutation
-      console.log("Login:", data);
-      navigate("/dashboard");
+      loginMutation.mutate(data, {
+        onSuccess: (data) => {
+          localStorage.setItem("access_token", data.token);
+          navigate("/admin/dashboard");
+        },
+      });
     } catch (err) {
       console.error(err);
     }
@@ -145,12 +160,20 @@ const LoginPage = () => {
       <OrbCanvas />
 
       {/* Header */}
-      <header className="relative flex items-center justify-between px-8 py-5" style={{ zIndex: 10 }}>
+      <header
+        className="relative flex items-center justify-between px-8 py-5"
+        style={{ zIndex: 10 }}
+      >
         <Link to="/" className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-[#2c2cdb] flex items-center justify-center shadow-md shadow-[#2c2cdb]/30">
             <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4">
               <circle cx="12" cy="12" r="3" fill="white" />
-              <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="white" strokeWidth="2" strokeLinecap="round" />
+              <path
+                d="M12 2v3M12 19v3M2 12h3M19 12h3"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
             </svg>
           </div>
           <span className="text-gray-900 font-bold tracking-tight text-lg">
@@ -158,9 +181,14 @@ const LoginPage = () => {
           </span>
         </Link>
 
-        <Link to="/register" className="text-sm text-gray-500 hover:text-gray-800 transition-colors">
+        <Link
+          to="/register"
+          className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+        >
           No account?{" "}
-          <span className="text-[#2c2cdb] font-semibold hover:underline">Sign up</span>
+          <span className="text-[#2c2cdb] font-semibold hover:underline">
+            Sign up
+          </span>
         </Link>
       </header>
 
@@ -181,7 +209,8 @@ const LoginPage = () => {
           <div
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[480px] rounded-full pointer-events-none"
             style={{
-              background: "radial-gradient(circle, rgba(234,230,245,0.9) 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, rgba(234,230,245,0.9) 0%, transparent 70%)",
               filter: "blur(48px)",
             }}
           />
@@ -202,7 +231,8 @@ const LoginPage = () => {
             <div
               className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl"
               style={{
-                background: "linear-gradient(90deg, #2c2cdb 0%, #a89be8 50%, #eae6f5 100%)",
+                background:
+                  "linear-gradient(90deg, #2c2cdb 0%, #a89be8 50%, #eae6f5 100%)",
               }}
             />
 
@@ -231,7 +261,9 @@ const LoginPage = () => {
                   autoComplete="email"
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-xs mt-1.5">{errors.email.message}</p>
+                  <p className="text-red-500 text-xs mt-1.5">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
@@ -265,7 +297,9 @@ const LoginPage = () => {
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-red-500 text-xs mt-1.5">{errors.password.message}</p>
+                  <p className="text-red-500 text-xs mt-1.5">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
@@ -276,7 +310,8 @@ const LoginPage = () => {
                 disabled={isSubmitting}
                 className="w-full relative overflow-hidden rounded-xl py-3.5 text-sm font-bold text-white transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed mt-2 group"
                 style={{
-                  background: "linear-gradient(135deg, #2c2cdb 0%, #4a4aff 100%)",
+                  background:
+                    "linear-gradient(135deg, #2c2cdb 0%, #4a4aff 100%)",
                   boxShadow: "0 4px 20px rgba(44,44,219,0.35)",
                 }}
               >
@@ -291,9 +326,24 @@ const LoginPage = () => {
                 />
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" strokeWidth="3" />
-                      <path d="M12 2a10 10 0 0 1 10 10" stroke="white" strokeWidth="3" strokeLinecap="round" />
+                    <svg
+                      className="animate-spin w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="rgba(255,255,255,0.3)"
+                        strokeWidth="3"
+                      />
+                      <path
+                        d="M12 2a10 10 0 0 1 10 10"
+                        stroke="white"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                      />
                     </svg>
                     Signing in…
                   </span>
@@ -336,9 +386,15 @@ const LoginPage = () => {
       >
         <span className="font-semibold text-gray-600">Bookify</span>
         <div className="flex gap-5">
-          <Link to="/privacy" className="hover:text-gray-700 transition-colors">Privacy Policy</Link>
-          <Link to="/terms" className="hover:text-gray-700 transition-colors">Terms of Service</Link>
-          <Link to="/help" className="hover:text-gray-700 transition-colors">Help Center</Link>
+          <Link to="/privacy" className="hover:text-gray-700 transition-colors">
+            Privacy Policy
+          </Link>
+          <Link to="/terms" className="hover:text-gray-700 transition-colors">
+            Terms of Service
+          </Link>
+          <Link to="/help" className="hover:text-gray-700 transition-colors">
+            Help Center
+          </Link>
         </div>
         <span>© 2024 Bookify. All rights reserved.</span>
       </footer>
