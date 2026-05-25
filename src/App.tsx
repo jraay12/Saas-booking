@@ -13,11 +13,18 @@ import Settings from "./pages/admin/Settings";
 import RegisterPage from "./pages/public/RegisterPage";
 import LoginPage from "./pages/public/LoginPage";
 import ProtectedRoute from "./router/ProtectedRoutes";
+import PublicRoute from "./router/PublicRoutes";
 function App() {
   return (
     <>
       <Routes>
-        <Route element={<PublicLayout />}>
+        <Route
+          element={
+            <PublicRoute>
+              <PublicLayout />
+            </PublicRoute>
+          }
+        >
           <Route path="/service/:slug" element={<BookingPage />} />
           <Route path="/staff/:slug" element={<StaffPage />} />
           <Route
