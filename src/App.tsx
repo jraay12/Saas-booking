@@ -10,6 +10,8 @@ import Service from "./pages/admin/Service";
 import Bookings from "./pages/admin/Bookings";
 import Staff from "./pages/admin/Staff";
 import Settings from "./pages/admin/Settings";
+import RegisterPage from "./pages/public/RegisterPage";
+import LoginPage from "./pages/public/LoginPage";
 function App() {
   return (
     <>
@@ -21,6 +23,8 @@ function App() {
             path="/booking/:slug/confirmation"
             element={<BookingConfirmation />}
           />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={<LoginPage />} />
         </Route>
 
         <Route element={<AdminLayout />}>
@@ -30,6 +34,7 @@ function App() {
           <Route path="/admin/staff" element={<Staff />} />
           <Route path="/admin/settings" element={<Settings />} />
         </Route>
+
       </Routes>
     </>
   );
