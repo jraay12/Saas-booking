@@ -12,6 +12,7 @@ import Staff from "./pages/admin/Staff";
 import Settings from "./pages/admin/Settings";
 import RegisterPage from "./pages/public/RegisterPage";
 import LoginPage from "./pages/public/LoginPage";
+import ProtectedRoute from "./router/ProtectedRoutes";
 function App() {
   return (
     <>
@@ -27,14 +28,19 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
         </Route>
 
-        <Route element={<AdminLayout />}>
+        <Route
+          element={
+            <ProtectedRoute>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/services" element={<Service />} />
           <Route path="/admin/bookings" element={<Bookings />} />
           <Route path="/admin/staff" element={<Staff />} />
           <Route path="/admin/settings" element={<Settings />} />
         </Route>
-
       </Routes>
     </>
   );
