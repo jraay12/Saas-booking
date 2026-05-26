@@ -147,10 +147,20 @@ type ServiceCardProps = {
 
 function ServiceCard({ data, onToggle }: ServiceCardProps) {
   return (
-    <div className="border min-h-70 md:max-w-80 bg-white rounded-2xl border-gray-300 p-4 flex flex-col shadow">
+    <div
+      className={`
+        border min-h-70 md:max-w-80 rounded-2xl p-4 flex flex-col shadow transition-all duration-300
+        ${data.is_active ? "bg-white border-gray-300" : "bg-white border-gray-200 opacity-70"}
+      `}
+    >
       {/* TOP */}
       <div className="flex justify-between items-center">
-        <h1 className="bg-[#eae6f5] px-2 text-xs py-1 font-medium rounded-md">
+        <h1
+          className={`
+            px-2 text-xs py-1 font-medium rounded-md
+            ${data.is_active ? "bg-[#eae6f5] text-black" : "bg-gray-100 text-black/60"}
+          `}
+        >
           {data.category}
         </h1>
 
@@ -172,29 +182,37 @@ function ServiceCard({ data, onToggle }: ServiceCardProps) {
       </div>
 
       {/* TITLE */}
-      <h1 className="mt-4 text-2xl max-w-3/4 font-medium">
+      <h1
+        className={`
+          mt-4 text-2xl max-w-3/4 font-medium transition-all
+          ${data.is_active ? "text-black" : "text-black/60"}
+        `}
+      >
         {data.service_name}
       </h1>
 
       {/* DESCRIPTION */}
-      <p className="mt-4 text-xs text-black/50 text-justify">
+      <p
+        className={`
+          mt-4 text-xs text-justify transition-all
+          ${data.is_active ? "text-black/50" : "text-black/40"}
+        `}
+      >
         {data.description}
       </p>
 
       {/* DETAILS */}
       <div className="flex mt-4 gap-10">
-        <div className="flex items-center text-black/60 gap-2">
+        <div className="flex items-center gap-2 text-black/60">
           <Clock className="w-4 h-4" />
-
           <p className="text-xs font-medium">
             {data.hour > 0 && `${data.hour} hr `}
             {data.minute} mins
           </p>
         </div>
 
-        <div className="flex items-center text-black/60 gap-2">
+        <div className="flex items-center gap-2 text-black/60">
           <Banknote className="w-4 h-4" />
-
           <p className="text-xs font-medium">₱{data.price}</p>
         </div>
       </div>
@@ -207,7 +225,7 @@ function ServiceCard({ data, onToggle }: ServiceCardProps) {
             ${
               data.is_active
                 ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
+                : "bg-red-100 text-red-600"
             }
           `}
         >
