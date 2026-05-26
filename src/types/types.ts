@@ -30,3 +30,7 @@ export type Service = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type ServiceFormType = Service & {
+  cover_image?: File | null;
+};

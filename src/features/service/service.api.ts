@@ -14,3 +14,9 @@ export const toggleStatus = async (id: string) => {
   const response = await api.post(`/service/${id}/toggle-status`);
   return response.data;
 };
+
+
+export const updateService = async (data: any, id: string) => {
+  const response = await api.patch(`/service/${id}`, data)
+  return response.data
+}

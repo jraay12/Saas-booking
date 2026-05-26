@@ -1,5 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createService, getAllService, toggleStatus } from "./service.api";
+import {
+  createService,
+  getAllService,
+  toggleStatus,
+  updateService,
+} from "./service.api";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../../lib/queryKey";
 import { getBusinessId } from "../../lib/decoder";
@@ -30,6 +35,20 @@ export const useToggleStatus = () => {
 
   return useMutation({
     mutationFn: toggleStatus,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.services(businessId!),
+      });
+    },
+  });
+};
+
+export const useUpdateService = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ data, id }: { data: any; id: string }) =>
+      updateService(data, id),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.services(businessId!),
