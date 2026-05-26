@@ -129,9 +129,9 @@ const Staff = () => {
   return (
     <div className="p-6">
       {/* HEADER */}
-      <div className="flex justify-between items-start mb-7">
+      <div className="flex justify-between items-start mb-10">
         <div>
-          <h1 className="text-[22px] font-medium text-black">
+          <h1 className="text-2xl font-medium text-black">
             Staff management
           </h1>
           <p className="text-sm text-black/50 mt-1">

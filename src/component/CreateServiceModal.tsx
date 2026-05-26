@@ -1,11 +1,13 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, UploadCloud, X } from "lucide-react";
 import Input from "./Input";
-import { services } from "../data/mockdata";
 import Search from "./Search";
-import { useCreateService } from "../features/service/service.hook";
+import {
+  useCreateService,
+  useGetAllServices,
+} from "../features/service/service.hook";
 import { useGetStaffMembers } from "../features/staff/staff.hook";
-import type { StaffMember } from "../types/types";
+import type { StaffMember, Service } from "../types/types";
 
 type Props = {
   open: boolean;
@@ -13,10 +15,17 @@ type Props = {
 };
 
 const CreateServiceModal = ({ onClose, open }: Props) => {
+  const { data: services = [] } = useGetAllServices();
+
   // EXISTING CATEGORIES
-  const categories = useMemo(
-    () => Array.from(new Set(services.map((item: any) => item.category))),
-    [],
+  const categories = useMemo<string[]>(
+    () =>
+      Array.from(
+        new Set(
+          services.map((item: Service) => item.category).filter(Boolean),
+        ),
+      ),
+    [services],
   );
 
   // CATEGORY
@@ -35,6 +44,14 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
 
     return URL.createObjectURL(image);
   }, [image]);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -58,10 +75,6 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
     }));
   };
 
-  const handleRemove = (id: string) => {
-    setSelectedStaff((prev) => prev.filter((item) => item !== id));
-  };
-
   // OPEN FILE PICKER
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -76,13 +89,36 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
     setImage(file);
   };
 
-  const {data: staffs} = useGetStaffMembers()
+  const { data: staffs = [] } = useGetStaffMembers();
+
   // FILTER STAFF
-  const filteredStaff = staffs?.filter((item: StaffMember) =>
-    item.user.first_name.toLowerCase().includes(searchStaff.toLowerCase()),
+  const filteredStaff = staffs.filter((item: StaffMember) =>
+    item.user?.first_name
+      ?.toLowerCase()
+      .includes(searchStaff.toLowerCase()),
   );
 
   const createServiceMutation = useCreateService();
+
+  const resetForm = () => {
+    setForm({
+      serviceName: "",
+      description: "",
+      duration: "",
+      price: "",
+    });
+
+    setCategory("");
+    setSearchStaff("");
+    setSelectedStaff([]);
+    setImage(null);
+    setShowCategories(false);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -105,7 +141,8 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
 
     createServiceMutation.mutate(formData, {
       onSuccess: () => {
-        console.log("success");
+        resetForm();
+        onClose();
       },
     });
   };
@@ -213,10 +250,12 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
                   {showCategories && (
                     <div className="absolute z-20 mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden">
                       {categories
-                        .filter((item) =>
-                          item.toLowerCase().includes(category.toLowerCase()),
+                        .filter((item: string) =>
+                          item
+                            .toLowerCase()
+                            .includes(category.toLowerCase()),
                         )
-                        .map((item) => (
+                        .map((item: string) => (
                           <button
                             key={item}
                             type="button"
@@ -342,23 +381,10 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
                   Assign Staff
                 </h1>
 
-                {/* <div className="flex flex-wrap gap-2 mb-4">
-                  {selectedStaff.length > 0 &&
-                    selectedStaff.map((item) => {
-                      return (
-                        <BannerStaff
-                          key={item}
-                          staff_name={item}
-                          onClick={() => handleRemove(item)}
-                        />
-                      );
-                    })}
-                </div> */}
-
                 <Search
                   placeHolder="Search staff members..."
                   className="text-xs"
-                  value={searchStaff ?? ""}
+                  value={searchStaff}
                   onChange={setSearchStaff}
                 />
 
@@ -383,9 +409,12 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
 
             <button
               type="submit"
-              className="px-4 py-2 text-sm bg-[#3525cc] text-white rounded-lg hover:bg-[#2d1fb3] transition cursor-pointer"
+              disabled={createServiceMutation.isPending}
+              className="px-4 py-2 text-sm bg-[#3525cc] text-white rounded-lg hover:bg-[#2d1fb3] transition cursor-pointer disabled:opacity-50"
             >
-              Save Service
+              {createServiceMutation.isPending
+                ? "Saving..."
+                : "Save Service"}
             </button>
           </div>
         </form>
@@ -397,7 +426,7 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
 export default CreateServiceModal;
 
 type AssignStaffProps = {
-  staff: any[];
+  staff: StaffMember[];
   selectedStaff: string[];
   setSelectedStaff: React.Dispatch<React.SetStateAction<string[]>>;
 };
@@ -411,7 +440,7 @@ function AssignStaffSection({
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(staff?.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil((staff?.length ?? 0) / ITEMS_PER_PAGE);
 
   const paginatedStaff = staff?.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -420,7 +449,9 @@ function AssignStaffSection({
 
   const handleSelect = (id: string) => {
     setSelectedStaff((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+      prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id],
     );
   };
 
@@ -428,7 +459,7 @@ function AssignStaffSection({
     <div className="mt-4">
       {/* STAFF LIST */}
       <div className="space-y-3">
-        {paginatedStaff?.map((item) => (
+        {paginatedStaff?.map((item: StaffMember) => (
           <StaffCard
             key={item.id}
             data={item}
@@ -442,6 +473,7 @@ function AssignStaffSection({
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
           <button
+            type="button"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((prev) => prev - 1)}
             className="text-xs px-3 py-1 border rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#3525cc]"
@@ -455,6 +487,7 @@ function AssignStaffSection({
 
               return (
                 <button
+                  type="button"
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   className={`w-7 h-7 rounded-md text-xs transition ${
@@ -470,6 +503,7 @@ function AssignStaffSection({
           </div>
 
           <button
+            type="button"
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((prev) => prev + 1)}
             className="text-xs px-3 py-1 border rounded-md disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#3525cc]"
@@ -491,6 +525,7 @@ type StaffCardProps = {
 function StaffCard({ data, selected, onSelect }: StaffCardProps) {
   return (
     <button
+      type="button"
       onClick={onSelect}
       className={`w-full border rounded-md p-3 text-left transition cursor-pointer ${
         selected
@@ -502,18 +537,26 @@ function StaffCard({ data, selected, onSelect }: StaffCardProps) {
         <div className="flex items-center gap-3">
           {/* AVATAR */}
           <div className="w-10 h-10 rounded-full bg-[#eae6f5] flex items-center justify-center text-xs font-semibold text-[#3525cc] overflow-hidden">
-            {data.user.avatar ? (
-              <img src={`${import.meta.env.VITE_IMAGE_PREFIX}${data.user.avatar}`} className="w-full h-full object-cover" />
+            {data.user?.avatar ? (
+              <img
+                src={`${import.meta.env.VITE_IMAGE_PREFIX}${data.user.avatar}`}
+                alt={data.user.first_name}
+                className="w-full h-full object-cover"
+              />
             ) : (
-              data.user.first_name?.charAt(0)
+              data.user?.first_name?.charAt(0)
             )}
           </div>
 
           {/* INFO */}
           <div className="flex flex-col">
-            <h1 className="text-sm font-medium text-black">{data.user.first_name}</h1>
+            <h1 className="text-sm font-medium text-black">
+              {data.user?.first_name ?? "Unknown"}
+            </h1>
 
-            <p className="text-xs text-black/50">{data.role}</p>
+            <p className="text-xs text-black/50">
+              {data.role ?? "Staff"}
+            </p>
           </div>
         </div>
 
@@ -530,15 +573,17 @@ function StaffCard({ data, selected, onSelect }: StaffCardProps) {
   );
 }
 
-type BannerStaff = {
+type BannerStaffProps = {
   onClick: () => void;
   staff_name: string;
 };
-function BannerStaff({ onClick, staff_name }: BannerStaff) {
+
+function BannerStaff({ onClick, staff_name }: BannerStaffProps) {
   return (
     <div className="flex items-center gap-2 border w-max px-2 rounded-full border-gray-300 bg-transparent m-2">
       <h1 className="text-xs text-[#3525cc] font-medium">{staff_name}</h1>
-      <button onClick={onClick} className="cursor-pointer">
+
+      <button type="button" onClick={onClick} className="cursor-pointer">
         <X className="w-4" />
       </button>
     </div>
