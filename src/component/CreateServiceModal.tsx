@@ -1,9 +1,11 @@
 import { useMemo, useRef, useState } from "react";
 import { ChevronDown, UploadCloud, X } from "lucide-react";
 import Input from "./Input";
-import { services, staffs } from "../data/mockdata";
+import { services } from "../data/mockdata";
 import Search from "./Search";
 import { useCreateService } from "../features/service/service.hook";
+import { useGetStaffMembers } from "../features/staff/staff.hook";
+import type { StaffMember } from "../types/types";
 
 type Props = {
   open: boolean;
@@ -74,9 +76,10 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
     setImage(file);
   };
 
+  const {data: staffs} = useGetStaffMembers()
   // FILTER STAFF
-  const filteredStaff = staffs.filter((item) =>
-    item.name.toLowerCase().includes(searchStaff.toLowerCase()),
+  const filteredStaff = staffs.filter((item: StaffMember) =>
+    item.user.first_name.toLowerCase().includes(searchStaff.toLowerCase()),
   );
 
   const createServiceMutation = useCreateService();
@@ -339,7 +342,7 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
                   Assign Staff
                 </h1>
 
-                <div className="flex flex-wrap gap-2 mb-4">
+                {/* <div className="flex flex-wrap gap-2 mb-4">
                   {selectedStaff.length > 0 &&
                     selectedStaff.map((item) => {
                       return (
@@ -350,7 +353,7 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
                         />
                       );
                     })}
-                </div>
+                </div> */}
 
                 <Search
                   placeHolder="Search staff members..."
@@ -480,7 +483,7 @@ function AssignStaffSection({
 }
 
 type StaffCardProps = {
-  data: any;
+  data: StaffMember;
   selected: boolean;
   onSelect: () => void;
 };
@@ -499,16 +502,16 @@ function StaffCard({ data, selected, onSelect }: StaffCardProps) {
         <div className="flex items-center gap-3">
           {/* AVATAR */}
           <div className="w-10 h-10 rounded-full bg-[#eae6f5] flex items-center justify-center text-xs font-semibold text-[#3525cc] overflow-hidden">
-            {data.avatar ? (
-              <img src={data.avatar} className="w-full h-full object-cover" />
+            {data.user.avatar ? (
+              <img src={`${import.meta.env.VITE_IMAGE_PREFIX}${data.user.avatar}`} className="w-full h-full object-cover" />
             ) : (
-              data.name?.charAt(0)
+              data.user.first_name?.charAt(0)
             )}
           </div>
 
           {/* INFO */}
           <div className="flex flex-col">
-            <h1 className="text-sm font-medium text-black">{data.name}</h1>
+            <h1 className="text-sm font-medium text-black">{data.user.first_name}</h1>
 
             <p className="text-xs text-black/50">{data.role}</p>
           </div>
