@@ -15,3 +15,18 @@ export type StaffMember = {
   updated_at: string;
   user: StaffUser;
 };
+
+export type Service = {
+  id: string;
+  business_id: string;
+  service_name: string;
+  category: string;
+  description: string;
+  price: string;
+  hour: number;
+  minute: number;
+  image_path: string;
+  is_active: boolean
+  createdAt: string;
+  updatedAt: string;
+};

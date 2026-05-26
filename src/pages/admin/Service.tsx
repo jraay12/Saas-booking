@@ -1,50 +1,52 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Banknote, Clock, Plus } from "lucide-react";
 import Button from "../../component/Button";
-import { services } from "../../data/mockdata";
 import CreateServiceModal from "../../component/CreateServiceModal";
+import { useGetAllServices } from "../../features/service/service.hook";
+import type { Service as ServiceType } from "../../types/types";
 
 const Service = () => {
-  const [createServiceModal, setCreateServiceModal] = useState(false)
-  const categories = [
-    "All",
-    ...Array.from(
-      new Set(services.map((item: any) => item.category))
-    ),
-  ];
+  const { data: services = [] } = useGetAllServices();
 
-  const [selectedCategory, setSelectedCategory] =
-    useState(categories[0]);
+  const [createServiceModal, setCreateServiceModal] = useState(false);
 
+  // CATEGORIES
+  const categories = useMemo<string[]>(
+    () => [
+      "All",
+      ...Array.from(
+        new Set<string>(services.map((item: ServiceType) => item.category)),
+      ),
+    ],
+    [services],
+  );
+
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   // SERVICES STATE
-  const [serviceList, setServiceList] = useState(
-    services.map((item: any) => ({
-      ...item,
-      active: true,
-    }))
-  );
+  const [serviceList, setServiceList] = useState<ServiceType[]>([]);
+
+  useEffect(() => {
+    setServiceList(services);
+  }, [services]);
 
   // FILTERED SERVICES
   const filteredServices =
     selectedCategory === "All"
       ? serviceList
-      : serviceList.filter(
-          (item: any) =>
-            item.category === selectedCategory
-        );
+      : serviceList.filter((item) => item.category === selectedCategory);
 
   // TOGGLE ACTIVE / INACTIVE
-  const handleToggle = (id: number) => {
-    setServiceList((prev: any) =>
-      prev.map((item: any) =>
+  const handleToggle = (id: string) => {
+    setServiceList((prev) =>
+      prev.map((item) =>
         item.id === id
           ? {
               ...item,
-              active: !item.active,
+              is_active: !item.is_active,
             }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
@@ -53,14 +55,11 @@ const Service = () => {
       {/* HEADER */}
       <div className="flex justify-between items-center mb-10">
         <div>
-          <h1 className="text-2xl font-semibold">
-            Service Management
-          </h1>
+          <h1 className="text-2xl font-semibold">Service Management</h1>
 
           <p className="text-sm text-black/50 mt-2 max-w-3/4">
-            Configure and manage the service offerings
-            available for booking, organize them by
-            category, and assign staff members.
+            Configure and manage the service offerings available for booking,
+            organize them by category, and assign staff members.
           </p>
         </div>
 
@@ -79,11 +78,11 @@ const Service = () => {
         onClick={setSelectedCategory}
       />
 
-      <div className="mb-10"></div>
+      <div className="mb-10" />
 
       {/* GRID */}
       <div className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(250px,1fr))]">
-        {filteredServices.map((item: any) => (
+        {filteredServices.map((item) => (
           <ServiceCard
             key={item.id}
             data={item}
@@ -91,7 +90,11 @@ const Service = () => {
           />
         ))}
       </div>
-      <CreateServiceModal onClose={() => setCreateServiceModal(false)} open={createServiceModal}/>
+
+      <CreateServiceModal
+        onClose={() => setCreateServiceModal(false)}
+        open={createServiceModal}
+      />
     </div>
   );
 };
@@ -114,7 +117,7 @@ function FilterSection({
   service,
 }: FilterSectionProps) {
   return (
-    <div className="flex flex-wrap gap-2 border  border-gray-300 bg-[#eae6f5] min-h-10 rounded-md p-2">
+    <div className="flex flex-wrap gap-2 border border-gray-300 bg-[#eae6f5] min-h-10 rounded-md p-2">
       {service.map((item) => {
         const isSelected = selectedService === item;
 
@@ -144,16 +147,13 @@ function FilterSection({
 ========================= */
 
 type ServiceCardProps = {
-  data: any;
+  data: ServiceType;
   onToggle: () => void;
 };
 
-function ServiceCard({
-  data,
-  onToggle,
-}: ServiceCardProps) {
+function ServiceCard({ data, onToggle }: ServiceCardProps) {
   return (
-    <div className="border min-h-70 md:max-w-80 bg-[white] rounded-2xl border-gray-300 p-4 flex flex-col shadow">
+    <div className="border min-h-70 md:max-w-80 bg-white rounded-2xl border-gray-300 p-4 flex flex-col shadow">
       {/* TOP */}
       <div className="flex justify-between items-center">
         <h1 className="bg-[#eae6f5] px-2 text-xs py-1 font-medium rounded-md">
@@ -165,21 +165,13 @@ function ServiceCard({
           onClick={onToggle}
           className={`
             relative w-11 h-6 rounded-full transition-all duration-300 cursor-pointer
-            ${
-              data.active
-                ? "bg-[#3525cc]"
-                : "bg-gray-300"
-            }
+            ${data.is_active ? "bg-[#3525cc]" : "bg-gray-300"}
           `}
         >
           <div
             className={`
               absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all duration-300
-              ${
-                data.active
-                  ? "translate-x-5"
-                  : "translate-x-0.5"
-              }
+              ${data.is_active ? "translate-x-5" : "translate-x-0.5"}
             `}
           />
         </button>
@@ -187,7 +179,7 @@ function ServiceCard({
 
       {/* TITLE */}
       <h1 className="mt-4 text-2xl max-w-3/4 font-medium">
-        {data.title}
+        {data.service_name}
       </h1>
 
       {/* DESCRIPTION */}
@@ -201,16 +193,15 @@ function ServiceCard({
           <Clock className="w-4 h-4" />
 
           <p className="text-xs font-medium">
-            {data.minutes} mins
+            {data.hour > 0 && `${data.hour} hr `}
+            {data.minute} mins
           </p>
         </div>
 
         <div className="flex items-center text-black/60 gap-2">
           <Banknote className="w-4 h-4" />
 
-          <p className="text-xs font-medium">
-            ₱{data.amount}
-          </p>
+          <p className="text-xs font-medium">₱{data.price}</p>
         </div>
       </div>
 
@@ -220,13 +211,13 @@ function ServiceCard({
           className={`
             text-[10px] px-2 py-1 rounded-full font-medium
             ${
-              data.active
+              data.is_active
                 ? "bg-green-100 text-green-700"
                 : "bg-red-100 text-red-700"
             }
           `}
         >
-          {data.active ? "Active" : "Inactive"}
+          {data.is_active ? "Active" : "Inactive"}
         </span>
       </div>
 
