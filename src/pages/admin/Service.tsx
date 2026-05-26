@@ -2,12 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { Banknote, Clock, Plus } from "lucide-react";
 import Button from "../../component/Button";
 import CreateServiceModal from "../../component/CreateServiceModal";
-import { useGetAllServices } from "../../features/service/service.hook";
+import {
+  useGetAllServices,
+  useToggleStatus,
+} from "../../features/service/service.hook";
 import type { Service as ServiceType } from "../../types/types";
 
 const Service = () => {
   const { data: services = [] } = useGetAllServices();
-
+  const toggleMutation = useToggleStatus();
   const [createServiceModal, setCreateServiceModal] = useState(false);
 
   // CATEGORIES
@@ -38,16 +41,7 @@ const Service = () => {
 
   // TOGGLE ACTIVE / INACTIVE
   const handleToggle = (id: string) => {
-    setServiceList((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              is_active: !item.is_active,
-            }
-          : item,
-      ),
-    );
+    toggleMutation.mutate(id);
   };
 
   return (

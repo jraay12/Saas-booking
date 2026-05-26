@@ -9,14 +9,14 @@ export const useCreateStaff = () => {
   return useMutation({
     mutationFn: createStaff,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.staffs(businessId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.staffs(businessId!) });
     },
   });
 };
 
 export const useGetStaffMembers = () => {
   return useQuery({
-    queryKey: queryKeys.staffs(businessId),
+    queryKey: queryKeys.staffs(businessId!),
     queryFn: getStaffMembers,
   });
 };
@@ -29,7 +29,7 @@ export const useDeleteMembershipStaff = () => {
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.staffs(businessId),
+        queryKey: queryKeys.staffs(businessId!),
       });
     },
   });
