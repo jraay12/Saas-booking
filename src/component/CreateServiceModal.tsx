@@ -3,6 +3,7 @@ import { ChevronDown, UploadCloud, X } from "lucide-react";
 import Input from "./Input";
 import { services, staffs } from "../data/mockdata";
 import Search from "./Search";
+import { useCreateService } from "../features/service/service.hook";
 
 type Props = {
   open: boolean;
@@ -25,7 +26,13 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
   const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
 
   // IMAGE
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<File | null>(null);
+
+  const imagePreview = useMemo(() => {
+    if (!image) return null;
+
+    return URL.createObjectURL(image);
+  }, [image]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -64,15 +71,41 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
 
     if (!file) return;
 
-    const imageUrl = URL.createObjectURL(file);
-
-    setImage(imageUrl);
+    setImage(file);
   };
 
   // FILTER STAFF
   const filteredStaff = staffs.filter((item) =>
     item.name.toLowerCase().includes(searchStaff.toLowerCase()),
   );
+
+  const createServiceMutation = useCreateService();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+
+    formData.append("service_name", form.serviceName);
+    formData.append("category", category);
+    formData.append("description", form.description);
+    formData.append("price", form.price);
+    formData.append("hour", "1");
+    formData.append("minute", form.duration);
+
+    selectedStaff.forEach((staffId) => {
+      formData.append("staffs[]", staffId);
+    });
+
+    if (image) {
+      formData.append("image", image);
+    }
+
+    createServiceMutation.mutate(formData, {
+      onSuccess: () => {
+        console.log("success");
+      },
+    });
+  };
 
   return (
     <div
@@ -120,6 +153,7 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
           </div>
 
           <button
+            type="button"
             className="hover:bg-black/10 p-1 rounded-md transition cursor-pointer"
             onClick={onClose}
           >
@@ -128,210 +162,230 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
         </div>
 
         {/* BODY */}
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          {/* LEFT GRID */}
-          <div className="border-r border-gray-200 p-4">
-            <h1 className="text-xs font-bold text-black/50 uppercase">
-              General Information
-            </h1>
-
-            <div className="mt-4 space-y-4">
-              {/* SERVICE NAME */}
-              <Input
-                label="Service Name"
-                className="bg-white text-xs"
-                placeholder="e.g Deep Tissue Massage"
-                onChange={handleChange}
-                value={form.serviceName}
-                type="text"
-                name="serviceName"
-              />
-
-              {/* CATEGORY */}
-              <div className="relative">
-                <label className="text-xs font-medium text-black">
-                  Category
-                </label>
-
-                <div className="relative mt-2">
-                  <input
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    onFocus={() => setShowCategories(true)}
-                    placeholder="Choose or create category"
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#3525cc]"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => setShowCategories((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50"
-                  >
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* DROPDOWN */}
-                {showCategories && (
-                  <div className="absolute z-20 mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden">
-                    {categories
-                      .filter((item) =>
-                        item.toLowerCase().includes(category.toLowerCase()),
-                      )
-                      .map((item) => (
-                        <button
-                          key={item}
-                          type="button"
-                          onClick={() => {
-                            setCategory(item);
-                            setShowCategories(false);
-                          }}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-[#f5f2ff] transition"
-                        >
-                          {item}
-                        </button>
-                      ))}
-
-                    {/* CREATE NEW */}
-                    {category && !categories.includes(category) && (
-                      <div className="border-t border-gray-100 px-3 py-2 text-xs text-[#3525cc] font-medium">
-                        Create new category:
-                        <span className="ml-1">"{category}"</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <p className="text-[11px] text-black/40 mt-1">
-                  You can select an existing category or create a new one by
-                  typing.
-                </p>
-              </div>
-
-              {/* DESCRIPTION */}
-              <div>
-                <label className="text-xs font-medium text-black">
-                  Description
-                </label>
-
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  placeholder="Describe what this service includes, expected outcomes, preparation requirements, or any important details clients should know before booking."
-                  className="w-full min-h-32 mt-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none resize-none focus:border-[#3525cc]"
-                />
-
-                <p className="text-[11px] text-black/40 mt-1">
-                  Provide a clear and concise explanation of the service for
-                  customers.
-                </p>
-              </div>
-
-              {/* DURATION + PRICE */}
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="Duration"
-                  className="bg-white text-xs"
-                  placeholder="60 mins"
-                  type="text"
-                  name="duration"
-                  value={form.duration}
-                  onChange={handleChange}
-                />
-
-                <Input
-                  label="Price"
-                  className="bg-white text-xs"
-                  placeholder="₱999"
-                  type="text"
-                  name="price"
-                  value={form.price}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT GRID */}
-          <div className="p-4">
-            <h1 className="text-xs text-black/50 font-bold uppercase">
-              Service Image
-            </h1>
-
-            {/* UPLOAD BOX */}
-            <div
-              onClick={handleImageClick}
-              className="flex flex-col items-center justify-center w-full border-2 min-h-52 mt-4 rounded-md border-dashed border-gray-300 bg-[#faf9ff] cursor-pointer hover:border-[#3525cc] transition p-4 text-center overflow-hidden"
-            >
-              {image ? (
-                <img
-                  src={image}
-                  alt="Service"
-                  className="w-full h-52 object-cover rounded-md"
-                />
-              ) : (
-                <>
-                  <UploadCloud className="w-8 h-8 text-[#3525cc]" />
-
-                  <p className="mt-3 text-sm font-medium text-black">
-                    Upload Service Image
-                  </p>
-
-                  <p className="text-xs text-black/50 mt-1">
-                    Drag and drop an image here or click to browse
-                  </p>
-
-                  <p className="text-[11px] text-black/40 mt-3">
-                    JPG, PNG • Recommended square or landscape image
-                  </p>
-                </>
-              )}
-            </div>
-
-            {/* HIDDEN INPUT */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleImageChange}
-            />
-
-            {/* ASSIGN STAFF */}
-            <div>
-              <h1 className="text-xs text-black/50 font-bold uppercase mt-4 mb-6">
-                Assign Staff
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            {/* LEFT GRID */}
+            <div className="border-r border-gray-200 p-4">
+              <h1 className="text-xs font-bold text-black/50 uppercase">
+                General Information
               </h1>
 
-              <div className="flex flex-wrap gap-2 mb-4">
-                {selectedStaff.length > 0 &&
-                  selectedStaff.map((item) => {
-                    return (
-                      <BannerStaff
-                        key={item}
-                        staff_name={item}
-                        onClick={() => handleRemove(item)}
-                      />
-                    );
-                  })}
+              <div className="mt-4 space-y-4">
+                {/* SERVICE NAME */}
+                <Input
+                  label="Service Name"
+                  className="bg-white text-xs"
+                  placeholder="e.g Deep Tissue Massage"
+                  onChange={handleChange}
+                  value={form.serviceName}
+                  type="text"
+                  name="serviceName"
+                />
+
+                {/* CATEGORY */}
+                <div className="relative">
+                  <label className="text-xs font-medium text-black">
+                    Category
+                  </label>
+
+                  <div className="relative mt-2">
+                    <input
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      onFocus={() => setShowCategories(true)}
+                      placeholder="Choose or create category"
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#3525cc]"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowCategories((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* DROPDOWN */}
+                  {showCategories && (
+                    <div className="absolute z-20 mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden">
+                      {categories
+                        .filter((item) =>
+                          item.toLowerCase().includes(category.toLowerCase()),
+                        )
+                        .map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => {
+                              setCategory(item);
+                              setShowCategories(false);
+                            }}
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-[#f5f2ff] transition"
+                          >
+                            {item}
+                          </button>
+                        ))}
+
+                      {/* CREATE NEW */}
+                      {category && !categories.includes(category) && (
+                        <div className="border-t border-gray-100 px-3 py-2 text-xs text-[#3525cc] font-medium">
+                          Create new category:
+                          <span className="ml-1">"{category}"</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <p className="text-[11px] text-black/40 mt-1">
+                    You can select an existing category or create a new one by
+                    typing.
+                  </p>
+                </div>
+
+                {/* DESCRIPTION */}
+                <div>
+                  <label className="text-xs font-medium text-black">
+                    Description
+                  </label>
+
+                  <textarea
+                    name="description"
+                    value={form.description}
+                    onChange={handleChange}
+                    placeholder="Describe what this service includes, expected outcomes, preparation requirements, or any important details clients should know before booking."
+                    className="w-full min-h-32 mt-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none resize-none focus:border-[#3525cc]"
+                  />
+
+                  <p className="text-[11px] text-black/40 mt-1">
+                    Provide a clear and concise explanation of the service for
+                    customers.
+                  </p>
+                </div>
+
+                {/* DURATION + PRICE */}
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label="Duration"
+                    className="bg-white text-xs"
+                    placeholder="60 mins"
+                    type="text"
+                    name="duration"
+                    value={form.duration}
+                    onChange={handleChange}
+                  />
+
+                  <Input
+                    label="Price"
+                    className="bg-white text-xs"
+                    placeholder="₱999"
+                    type="text"
+                    name="price"
+                    value={form.price}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT GRID */}
+            <div className="p-4">
+              <h1 className="text-xs text-black/50 font-bold uppercase">
+                Service Image
+              </h1>
+
+              {/* UPLOAD BOX */}
+              <div
+                onClick={handleImageClick}
+                className="flex flex-col items-center justify-center w-full border-2 min-h-52 mt-4 rounded-md border-dashed border-gray-300 bg-[#faf9ff] cursor-pointer hover:border-[#3525cc] transition p-4 text-center overflow-hidden"
+              >
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Service"
+                    className="w-full h-52 object-cover rounded-md"
+                  />
+                ) : (
+                  <>
+                    <UploadCloud className="w-8 h-8 text-[#3525cc]" />
+
+                    <p className="mt-3 text-sm font-medium text-black">
+                      Upload Service Image
+                    </p>
+
+                    <p className="text-xs text-black/50 mt-1">
+                      Drag and drop an image here or click to browse
+                    </p>
+
+                    <p className="text-[11px] text-black/40 mt-3">
+                      JPG, PNG • Recommended square or landscape image
+                    </p>
+                  </>
+                )}
               </div>
 
-              <Search
-                placeHolder="Search staff members..."
-                className="text-xs"
-                value={searchStaff ?? ""}
-                onChange={setSearchStaff}
+              {/* HIDDEN INPUT */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageChange}
               />
 
-              <AssignStaffSection
-                staff={filteredStaff}
-                selectedStaff={selectedStaff}
-                setSelectedStaff={setSelectedStaff}
-              />
+              {/* ASSIGN STAFF */}
+              <div>
+                <h1 className="text-xs text-black/50 font-bold uppercase mt-4 mb-6">
+                  Assign Staff
+                </h1>
+
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {selectedStaff.length > 0 &&
+                    selectedStaff.map((item) => {
+                      return (
+                        <BannerStaff
+                          key={item}
+                          staff_name={item}
+                          onClick={() => handleRemove(item)}
+                        />
+                      );
+                    })}
+                </div>
+
+                <Search
+                  placeHolder="Search staff members..."
+                  className="text-xs"
+                  value={searchStaff ?? ""}
+                  onChange={setSearchStaff}
+                />
+
+                <AssignStaffSection
+                  staff={filteredStaff}
+                  selectedStaff={selectedStaff}
+                  setSelectedStaff={setSelectedStaff}
+                />
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* FOOTER */}
+          <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-4 py-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-100 transition cursor-pointer"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              className="px-4 py-2 text-sm bg-[#3525cc] text-white rounded-lg hover:bg-[#2d1fb3] transition cursor-pointer"
+            >
+              Save Service
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

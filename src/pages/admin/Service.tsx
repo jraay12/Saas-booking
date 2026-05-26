@@ -53,7 +53,7 @@ const Service = () => {
       {/* HEADER */}
       <div className="flex justify-between items-center mb-10">
         <div>
-          <h1 className="text-3xl font-semibold">
+          <h1 className="text-2xl font-semibold">
             Service Management
           </h1>
 
@@ -82,7 +82,7 @@ const Service = () => {
       <div className="mb-10"></div>
 
       {/* GRID */}
-      <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
+      <div className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(250px,1fr))]">
         {filteredServices.map((item: any) => (
           <ServiceCard
             key={item.id}
