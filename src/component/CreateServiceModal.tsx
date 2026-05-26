@@ -78,7 +78,7 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
 
   const {data: staffs} = useGetStaffMembers()
   // FILTER STAFF
-  const filteredStaff = staffs.filter((item: StaffMember) =>
+  const filteredStaff = staffs?.filter((item: StaffMember) =>
     item.user.first_name.toLowerCase().includes(searchStaff.toLowerCase()),
   );
 
@@ -411,9 +411,9 @@ function AssignStaffSection({
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(staff.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(staff?.length / ITEMS_PER_PAGE);
 
-  const paginatedStaff = staff.slice(
+  const paginatedStaff = staff?.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE,
   );
@@ -428,7 +428,7 @@ function AssignStaffSection({
     <div className="mt-4">
       {/* STAFF LIST */}
       <div className="space-y-3">
-        {paginatedStaff.map((item) => (
+        {paginatedStaff?.map((item) => (
           <StaffCard
             key={item.id}
             data={item}
