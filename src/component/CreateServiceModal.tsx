@@ -21,9 +21,7 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
   const categories = useMemo<string[]>(
     () =>
       Array.from(
-        new Set(
-          services.map((item: Service) => item.category).filter(Boolean),
-        ),
+        new Set(services.map((item: Service) => item.category).filter(Boolean)),
       ),
     [services],
   );
@@ -93,9 +91,7 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
 
   // FILTER STAFF
   const filteredStaff = staffs.filter((item: StaffMember) =>
-    item.user?.first_name
-      ?.toLowerCase()
-      .includes(searchStaff.toLowerCase()),
+    item.user?.first_name?.toLowerCase().includes(searchStaff.toLowerCase()),
   );
 
   const createServiceMutation = useCreateService();
@@ -131,9 +127,10 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
     formData.append("hour", "1");
     formData.append("minute", form.duration);
 
-    selectedStaff.forEach((staffId) => {
-      formData.append("staffs[]", staffId);
-    });
+    if(selectedStaff.length > 0){
+      formData.append("staffIds", JSON.stringify(selectedStaff))
+    }
+    
 
     if (image) {
       formData.append("image", image);
@@ -251,9 +248,7 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
                     <div className="absolute z-20 mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden">
                       {categories
                         .filter((item: string) =>
-                          item
-                            .toLowerCase()
-                            .includes(category.toLowerCase()),
+                          item.toLowerCase().includes(category.toLowerCase()),
                         )
                         .map((item: string) => (
                           <button
@@ -412,9 +407,7 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
               disabled={createServiceMutation.isPending}
               className="px-4 py-2 text-sm bg-[#3525cc] text-white rounded-lg hover:bg-[#2d1fb3] transition cursor-pointer disabled:opacity-50"
             >
-              {createServiceMutation.isPending
-                ? "Saving..."
-                : "Save Service"}
+              {createServiceMutation.isPending ? "Saving..." : "Save Service"}
             </button>
           </div>
         </form>
@@ -449,9 +442,7 @@ function AssignStaffSection({
 
   const handleSelect = (id: string) => {
     setSelectedStaff((prev) =>
-      prev.includes(id)
-        ? prev.filter((item) => item !== id)
-        : [...prev, id],
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
@@ -463,8 +454,8 @@ function AssignStaffSection({
           <StaffCard
             key={item.id}
             data={item}
-            selected={selectedStaff.includes(item.id)}
-            onSelect={() => handleSelect(item.id)}
+            selected={selectedStaff.includes(item.user_id)}
+            onSelect={() => handleSelect(item.user_id)}
           />
         ))}
       </div>
@@ -554,9 +545,7 @@ function StaffCard({ data, selected, onSelect }: StaffCardProps) {
               {data.user?.first_name ?? "Unknown"}
             </h1>
 
-            <p className="text-xs text-black/50">
-              {data.role ?? "Staff"}
-            </p>
+            <p className="text-xs text-black/50">{data.role ?? "Staff"}</p>
           </div>
         </div>
 

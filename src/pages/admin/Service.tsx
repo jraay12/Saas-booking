@@ -19,14 +19,16 @@ import {
 import type {
   ServiceFormType,
   Service as ServiceType,
+  StaffMember,
 } from "../../types/types";
-
+import { useGetStaffMembers } from "../../features/staff/staff.hook";
 /* =========================
    MAIN PAGE
 ========================= */
 
 const Service = () => {
   const { data: services = [] } = useGetAllServices();
+  const { data: staffs = [] } = useGetStaffMembers();
   const toggleMutation = useToggleStatus();
   const updateServiceMutation = useUpdateService();
 
@@ -175,6 +177,7 @@ const Service = () => {
             setStaffDrawerOpen(false);
             setSelectedService(null);
           }}
+          staffList={staffs}
         />
       )}
     </div>
@@ -690,78 +693,33 @@ function EditServiceModal({ service, onClose, onSave }: EditServiceModalProps) {
    MANAGE STAFF SIDE PANEL
 ========================= */
 
-type StaffMember = {
-  id: string;
-  name: string;
-  role: string;
-  initials: string;
-  assigned: boolean;
-};
+/* =========================
+   MANAGE STAFF SIDE PANEL
+========================= */
 
 type ManageStaffPanelProps = {
   service: ServiceType;
   onClose: () => void;
+  staffList: StaffMember[];
 };
 
-function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
+function ManageStaffPanel({
+  service,
+  onClose,
+  staffList,
+}: ManageStaffPanelProps) {
   const [visible, setVisible] = useState(false);
 
-  const [staffList, setStaffList] = useState<StaffMember[]>([
-    {
-      id: "s1",
-      name: "Maria Santos",
-      role: "Senior Stylist",
-      initials: "MS",
-      assigned: true,
-    },
-    {
-      id: "s2",
-      name: "Juan Dela Cruz",
-      role: "Colorist",
-      initials: "JD",
-      assigned: false,
-    },
-    {
-      id: "s3",
-      name: "Ana Reyes",
-      role: "Nail Technician",
-      initials: "AR",
-      assigned: false,
-    },
-    {
-      id: "s4",
-      name: "Carlos Bautista",
-      role: "Esthetician",
-      initials: "CB",
-      assigned: false,
-    },
-    {
-      id: "s5",
-      name: "Liza Mendoza",
-      role: "Junior Stylist",
-      initials: "LM",
-      assigned: true,
-    },
-  ]);
-
-  // Trigger enter animation after mount
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
   }, []);
 
   const handleClose = () => {
     setVisible(false);
-    setTimeout(onClose, 300); // wait for exit animation
-  };
-
-  const toggleAssign = (id: string) => {
-    setStaffList((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, assigned: !s.assigned } : s)),
-    );
+    setTimeout(onClose, 300);
   };
 
   const handleSave = () => {
-    // Wire your mutation here
     handleClose();
   };
 
@@ -771,78 +729,234 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
       <div
         onClick={handleClose}
         className="fixed inset-0 z-40 transition-opacity duration-300"
-        style={{ background: "rgba(0,0,0,0.4)", opacity: visible ? 1 : 0 }}
+        style={{ background: "rgba(0,0,0,0.35)", opacity: visible ? 1 : 0 }}
       />
 
       {/* PANEL */}
       <div
-        className="fixed top-0 right-0 h-full w-[420px] max-w-full bg-white z-50 shadow-2xl flex flex-col
-                   transition-transform duration-300 ease-out"
-        style={{ transform: visible ? "translateX(0)" : "translateX(100%)" }}
+        className="fixed top-0 right-0 h-full w-[440px] max-w-full bg-white z-50 flex flex-col transition-transform duration-300 ease-out"
+        style={{
+          transform: visible ? "translateX(0)" : "translateX(100%)",
+          boxShadow:
+            "-8px 0 40px rgba(53,37,204,0.10), -2px 0 8px rgba(0,0,0,0.06)",
+        }}
       >
-        {/* HEADER */}
-        <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200">
-          <h2 className="text-base font-semibold">Manage Staff</h2>
-          <button
-            onClick={handleClose}
-            className="p-1 rounded-md hover:bg-gray-100 text-black/50"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        {/* ── HEADER ── */}
+        <div className="relative px-6 pt-6 pb-5 overflow-hidden">
+          {/* Decorative background blob */}
+          <div
+            className="absolute -top-8 -right-8 w-40 h-40 rounded-full opacity-[0.07] pointer-events-none"
+            style={{ background: "#3525cc" }}
+          />
+          <div
+            className="absolute top-6 right-14 w-16 h-16 rounded-full opacity-[0.05] pointer-events-none"
+            style={{ background: "#3525cc" }}
+          />
 
-        {/* BODY */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          <div className="bg-[#eae6f5] rounded-xl p-3 mb-5">
-            <p className="text-sm font-semibold text-[#3525cc]">
-              {service.service_name}
-            </p>
-            <p className="text-xs text-black/50 mt-0.5">{service.category}</p>
+          {/* Top row */}
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2.5">
+              {/* Icon badge */}
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                style={{ background: "#eae6f5" }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#3525cc"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <span className="text-xs font-semibold tracking-widest uppercase text-black/30">
+                Staff Assignment
+              </span>
+            </div>
+
+            <button
+              onClick={handleClose}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-black/30 hover:text-black/60 hover:bg-black/5 transition-all"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
-          <p className="text-xs font-semibold uppercase tracking-wider text-black/40 mb-3">
-            Staff Members
+          {/* Service card */}
+          <div
+            className="rounded-2xl p-4 relative overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, #3525cc 0%, #5b48e8 100%)",
+            }}
+          >
+            {/* Subtle inner grain */}
+            <div
+              className="absolute inset-0 opacity-[0.04] pointer-events-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+              }}
+            />
+
+            <div className="relative">
+              <p
+                className="text-[10px] font-semibold uppercase tracking-widest mb-1"
+                style={{ color: "rgba(255,255,255,0.55)" }}
+              >
+                {service.category}
+              </p>
+              <p className="text-white text-lg font-semibold leading-tight">
+                {service.service_name}
+              </p>
+              <div className="flex items-center gap-1.5 mt-3">
+                <div
+                  className="h-1 w-1 rounded-full"
+                  style={{ background: "rgba(255,255,255,0.4)" }}
+                />
+                <p
+                  className="text-xs"
+                  style={{ color: "rgba(255,255,255,0.6)" }}
+                >
+                  {staffList?.length ?? 0} staff member
+                  {(staffList?.length ?? 0) !== 1 ? "s" : ""} listed
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── DIVIDER ── */}
+        <div className="mx-6 border-t border-gray-100" />
+
+        {/* ── BODY ── */}
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-black/25 mb-4">
+            Members · {staffList?.length ?? 0}
           </p>
 
-          <div className="flex flex-col gap-3">
-            {staffList.map((staff) => (
-              <div
-                key={staff.id}
-                className="flex items-center gap-3 border border-gray-200 rounded-xl p-3 bg-gray-50"
-              >
-                <div className="w-9 h-9 rounded-full bg-[#3525cc] text-white flex items-center justify-center text-sm font-semibold flex-shrink-0">
-                  {staff.initials}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{staff.name}</p>
-                  <p className="text-xs text-black/50">{staff.role}</p>
-                </div>
-                <button
-                  onClick={() => toggleAssign(staff.id)}
-                  className={`text-[10px] px-3 py-1 rounded-full font-medium transition cursor-pointer ${
-                    staff.assigned
-                      ? "bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-600"
-                      : "bg-gray-200 text-black/50 hover:bg-[#eae6f5] hover:text-[#3525cc]"
-                  }`}
+          <div className="flex flex-col gap-2.5">
+            {staffList?.map((staff, index) => {
+              const initials = getInitials(
+                staff.user.first_name,
+                staff.user.last_name,
+              );
+              const hasAvatar = !!staff.user.avatar;
+
+              // Cycle through subtle accent colors for avatars without images
+              const accentPalette = [
+                { bg: "#eae6f5", text: "#3525cc" },
+                { bg: "#e0f2fe", text: "#0369a1" },
+                { bg: "#fce7f3", text: "#be185d" },
+                { bg: "#dcfce7", text: "#15803d" },
+                { bg: "#fff7ed", text: "#c2410c" },
+              ];
+              const accent = accentPalette[index % accentPalette.length];
+
+              return (
+                <div
+                  key={staff.id}
+                  className="flex items-center gap-3.5 rounded-2xl px-4 py-3 border border-gray-100 bg-white transition-all duration-200 hover:border-[#3525cc]/20 hover:shadow-sm group"
+                  style={{ animationDelay: `${index * 40}ms` }}
                 >
-                  {staff.assigned ? "Assigned" : "Assign"}
-                </button>
+                  {/* AVATAR */}
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 overflow-hidden transition-transform duration-200 group-hover:scale-105"
+                    style={
+                      hasAvatar
+                        ? {}
+                        : { background: accent.bg, color: accent.text }
+                    }
+                  >
+                    {hasAvatar ? (
+                      <img
+                        src={`${import.meta.env.VITE_IMAGE_PREFIX}${staff.user.avatar}`}
+                        alt={`${staff.user.first_name} ${staff.user.last_name}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      initials
+                    )}
+                  </div>
+
+                  {/* INFO */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-black/80 truncate leading-tight">
+                      {staff.user.first_name} {staff.user.last_name}
+                    </p>
+                    <p className="text-xs text-black/35 mt-0.5 truncate">
+                      {staff.role}
+                    </p>
+                  </div>
+
+                  {/* ROLE PILL */}
+                  <div
+                    className="flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full"
+                    style={{ background: "#eae6f5", color: "#3525cc" }}
+                  >
+                    Assigned
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* EMPTY STATE */}
+            {(!staffList || staffList.length === 0) && (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                  style={{ background: "#eae6f5" }}
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#3525cc"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <line x1="23" y1="11" x2="17" y2="11" />
+                    <line x1="20" y1="8" x2="20" y2="14" />
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-black/50">
+                    No staff assigned
+                  </p>
+                  <p className="text-xs text-black/30 mt-1">
+                    Assign staff members to this service
+                  </p>
+                </div>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
-        {/* FOOTER */}
-        <div className="flex gap-3 px-6 py-4 border-t border-gray-200">
+        {/* ── FOOTER ── */}
+        <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
           <button
             onClick={handleClose}
-            className="flex-1 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="flex-1 py-2.5 text-sm font-medium border border-gray-200 rounded-xl hover:bg-gray-50 text-black/60 transition-all"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 py-2 text-sm bg-[#3525cc] text-white rounded-lg hover:bg-[#2a1db0]"
+            className="flex-1 py-2.5 text-sm font-semibold rounded-xl text-white transition-all hover:opacity-90 active:scale-[0.98]"
+            style={{
+              background: "linear-gradient(135deg, #3525cc 0%, #5b48e8 100%)",
+              boxShadow: "0 4px 14px rgba(53,37,204,0.3)",
+            }}
           >
             Save Changes
           </button>
@@ -850,4 +964,7 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
       </div>
     </>
   );
+}
+function getInitials(first: string, last: string) {
+  return `${first?.[0] ?? ""}${last?.[0] ?? ""}`.toUpperCase();
 }
