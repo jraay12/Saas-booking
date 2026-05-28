@@ -16,6 +16,16 @@ export type StaffMember = {
   user: StaffUser;
 };
 
+export type AssignedStaff = {
+  id: string;
+  service_id: string;
+  staff_id: string;
+  business_id: string;
+  created_at: string;
+
+  staff: StaffUser;
+};
+
 export type Service = {
   id: string;
   business_id: string;
