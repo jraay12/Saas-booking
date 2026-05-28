@@ -1,4 +1,5 @@
 import { api } from "../../lib/axios";
+import type { StaffMember } from "../../types/types";
 
 export const createService = async (data: any) => {
   const response = await api.post("/service", data);
@@ -22,5 +23,10 @@ export const updateService = async (data: any, id: string) => {
 
 export const getAssignedStaffInService = async (id: string) => {
   const response = await api.get(`/service/${id}/assigned`);
+  return response.data;
+};
+
+export const getUnassignedStaffInService = async (id: string): Promise<StaffMember[]> => {
+  const response = await api.get(`/service/${id}/unassigned`);
   return response.data;
 };

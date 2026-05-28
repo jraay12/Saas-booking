@@ -15,23 +15,22 @@ import {
   useGetAllServices,
   useToggleStatus,
   useUpdateService,
-  useGetAllAssignedStaff
+  useGetAllAssignedStaff,
+  useGetAllUnAssignedStaff,
 } from "../../features/service/service.hook";
 import type {
   AssignedStaff,
   ServiceFormType,
   Service as ServiceType,
-  StaffMember,
 } from "../../types/types";
-import { useGetStaffMembers } from "../../features/staff/staff.hook";
+
 /* =========================
    MAIN PAGE
 ========================= */
 
 const Service = () => {
   const { data: services = [] } = useGetAllServices();
-  const { data: staffs = [] } = useGetStaffMembers();
-  
+
   const toggleMutation = useToggleStatus();
   const updateServiceMutation = useUpdateService();
 
@@ -180,7 +179,6 @@ const Service = () => {
             setStaffDrawerOpen(false);
             setSelectedService(null);
           }}
-          staffList={staffs}
         />
       )}
     </div>
@@ -696,24 +694,9 @@ function EditServiceModal({ service, onClose, onSave }: EditServiceModalProps) {
    MANAGE STAFF SIDE PANEL
 ========================= */
 
-
-const ASSIGNED_MOCK: any[] = [
-  {
-    id: "a1",
-    user: { first_name: "Maria", last_name: "Santos", avatar: null },
-    role: "Senior Stylist",
-  },
-  {
-    id: "a2",
-    user: { first_name: "James", last_name: "Reyes", avatar: null },
-    role: "Colorist",
-  },
-];
-
 type ManageStaffPanelProps = {
   service: ServiceType;
   onClose: () => void;
-  staffList: StaffMember[];
 };
 
 const accentPalette = [
@@ -724,14 +707,10 @@ const accentPalette = [
   { bg: "#fff7ed", text: "#c2410c" },
 ];
 
-function ManageStaffPanel({
-  service,
-  onClose,
-  staffList,
-}: ManageStaffPanelProps) {
+function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
   const [visible, setVisible] = useState(false);
-  const {data: staffAssigned = []} = useGetAllAssignedStaff(service.id)
- 
+  const { data: staffAssigned = [] } = useGetAllAssignedStaff(service.id);
+  const { data: staffList = [] } = useGetAllUnAssignedStaff(service.id);
 
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
