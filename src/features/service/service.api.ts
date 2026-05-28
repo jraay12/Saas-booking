@@ -15,8 +15,12 @@ export const toggleStatus = async (id: string) => {
   return response.data;
 };
 
-
 export const updateService = async (data: any, id: string) => {
-  const response = await api.patch(`/service/${id}`, data)
-  return response.data
-}
+  const response = await api.patch(`/service/${id}`, data);
+  return response.data;
+};
+
+export const getAssignedStaffInService = async (id: string) => {
+  const response = await api.get(`/service/${id}/assigned`);
+  return response.data;
+};

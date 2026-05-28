@@ -4,6 +4,7 @@ import {
   getAllService,
   toggleStatus,
   updateService,
+  getAssignedStaffInService,
 } from "./service.api";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../../lib/queryKey";
@@ -54,5 +55,13 @@ export const useUpdateService = () => {
         queryKey: queryKeys.services(businessId!),
       });
     },
+  });
+};
+
+export const useGetAllAssignedStaff = (id: string) => {
+  return useQuery({
+    queryKey: queryKeys.assignedStaff(businessId!, id),
+    queryFn: () => getAssignedStaffInService(id),
+    enabled: !!id
   });
 };

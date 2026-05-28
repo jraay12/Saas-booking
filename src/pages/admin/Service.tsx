@@ -15,8 +15,10 @@ import {
   useGetAllServices,
   useToggleStatus,
   useUpdateService,
+  useGetAllAssignedStaff
 } from "../../features/service/service.hook";
 import type {
+  AssignedStaff,
   ServiceFormType,
   Service as ServiceType,
   StaffMember,
@@ -29,6 +31,7 @@ import { useGetStaffMembers } from "../../features/staff/staff.hook";
 const Service = () => {
   const { data: services = [] } = useGetAllServices();
   const { data: staffs = [] } = useGetStaffMembers();
+  
   const toggleMutation = useToggleStatus();
   const updateServiceMutation = useUpdateService();
 
@@ -693,9 +696,19 @@ function EditServiceModal({ service, onClose, onSave }: EditServiceModalProps) {
    MANAGE STAFF SIDE PANEL
 ========================= */
 
-/* =========================
-   MANAGE STAFF SIDE PANEL
-========================= */
+
+const ASSIGNED_MOCK: any[] = [
+  {
+    id: "a1",
+    user: { first_name: "Maria", last_name: "Santos", avatar: null },
+    role: "Senior Stylist",
+  },
+  {
+    id: "a2",
+    user: { first_name: "James", last_name: "Reyes", avatar: null },
+    role: "Colorist",
+  },
+];
 
 type ManageStaffPanelProps = {
   service: ServiceType;
@@ -703,12 +716,22 @@ type ManageStaffPanelProps = {
   staffList: StaffMember[];
 };
 
+const accentPalette = [
+  { bg: "#eae6f5", text: "#3525cc" },
+  { bg: "#e0f2fe", text: "#0369a1" },
+  { bg: "#fce7f3", text: "#be185d" },
+  { bg: "#dcfce7", text: "#15803d" },
+  { bg: "#fff7ed", text: "#c2410c" },
+];
+
 function ManageStaffPanel({
   service,
   onClose,
   staffList,
 }: ManageStaffPanelProps) {
   const [visible, setVisible] = useState(false);
+  const {data: staffAssigned = []} = useGetAllAssignedStaff(service.id)
+ 
 
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
@@ -719,9 +742,29 @@ function ManageStaffPanel({
     setTimeout(onClose, 300);
   };
 
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    requestAnimationFrame(() => setVisible(true));
+  }, []);
+
   const handleSave = () => {
+    const toAssign = staffList.filter((s) => selected.has(s.id));
+    console.log("Assigning:", toAssign); // wire to your API here
     handleClose();
   };
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  // Replace ASSIGNED_MOCK with your real assigned staff list prop
+  const assignedStaff = staffAssigned;
+  const unassignedStaff = staffList; // already filtered unassigned from parent
 
   return (
     <>
@@ -824,8 +867,8 @@ function ManageStaffPanel({
                   className="text-xs"
                   style={{ color: "rgba(255,255,255,0.6)" }}
                 >
-                  {staffList?.length ?? 0} staff member
-                  {(staffList?.length ?? 0) !== 1 ? "s" : ""} listed
+                  {assignedStaff?.length ?? 0} staff member
+                  {(assignedStaff?.length ?? 0) !== 1 ? "s" : ""} listed
                 </p>
               </div>
             </div>
@@ -836,36 +879,116 @@ function ManageStaffPanel({
         <div className="mx-6 border-t border-gray-100" />
 
         {/* ── BODY ── */}
+        {/* ── BODY ── */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
+          {/* ASSIGNED SECTION */}
           <p className="text-[10px] font-bold uppercase tracking-widest text-black/25 mb-4">
-            Members · {staffList?.length ?? 0}
+            Assigned · {assignedStaff.length}
+          </p>
+          <div className="flex flex-col gap-2.5 mb-6">
+            {assignedStaff.map((staff: AssignedStaff, index: number) => {
+              const initials = getInitials(
+                staff.staff.first_name,
+                staff.staff.last_name,
+              );
+              const hasAvatar = !!staff.staff.avatar;
+              const accent = accentPalette[index % accentPalette.length];
+              return (
+                <div
+                  key={staff.id}
+                  className="flex items-center gap-3.5 rounded-2xl px-4 py-3 border border-gray-100 bg-white group"
+                >
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 overflow-hidden"
+                    style={
+                      hasAvatar
+                        ? {}
+                        : { background: accent.bg, color: accent.text }
+                    }
+                  >
+                    {hasAvatar ? (
+                      <img
+                        src={`${import.meta.env.VITE_IMAGE_PREFIX}${staff.staff.avatar}`}
+                        alt={`${staff.staff.first_name} ${staff.staff.last_name}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      initials
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-black/80 truncate leading-tight">
+                      {staff.staff.first_name} {staff.staff.last_name}
+                    </p>
+                    {/* <p className="text-xs text-black/35 mt-0.5 truncate">
+                      {staff.role}
+                    </p> */}
+                  </div>
+                  <div
+                    className="flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full"
+                    style={{ background: "#eae6f5", color: "#3525cc" }}
+                  >
+                    Assigned
+                  </div>
+                </div>
+              );
+            })}
+            {assignedStaff.length === 0 && (
+              <p className="text-xs text-black/30 text-center py-4">
+                No staff assigned yet
+              </p>
+            )}
+          </div>
+
+          {/* DIVIDER */}
+          <div className="border-t border-gray-100 mb-6" />
+
+          {/* UNASSIGNED SECTION */}
+          <p className="text-[10px] font-bold uppercase tracking-widest text-black/25 mb-4">
+            Available to Assign · {unassignedStaff.length}
           </p>
 
+          {selected.size > 0 && (
+            <div
+              className="text-[11px] font-semibold rounded-xl px-3 py-2 mb-3 flex items-center gap-1.5"
+              style={{ background: "#f0eeff", color: "#3525cc" }}
+            >
+              <svg width="13" height="13" viewBox="0 0 12 12" fill="none">
+                <path
+                  d="M2 6l3 3 5-5"
+                  stroke="#3525cc"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {selected.size} selected — click Save to assign
+            </div>
+          )}
+
           <div className="flex flex-col gap-2.5">
-            {staffList?.map((staff, index) => {
+            {unassignedStaff.map((staff, index) => {
               const initials = getInitials(
                 staff.user.first_name,
                 staff.user.last_name,
               );
               const hasAvatar = !!staff.user.avatar;
-
-              // Cycle through subtle accent colors for avatars without images
-              const accentPalette = [
-                { bg: "#eae6f5", text: "#3525cc" },
-                { bg: "#e0f2fe", text: "#0369a1" },
-                { bg: "#fce7f3", text: "#be185d" },
-                { bg: "#dcfce7", text: "#15803d" },
-                { bg: "#fff7ed", text: "#c2410c" },
-              ];
-              const accent = accentPalette[index % accentPalette.length];
-
+              const accent =
+                accentPalette[
+                  (index + assignedStaff.length) % accentPalette.length
+                ];
+              const isSelected = selected.has(staff.id);
               return (
                 <div
                   key={staff.id}
-                  className="flex items-center gap-3.5 rounded-2xl px-4 py-3 border border-gray-100 bg-white transition-all duration-200 hover:border-[#3525cc]/20 hover:shadow-sm group"
-                  style={{ animationDelay: `${index * 40}ms` }}
+                  onClick={() => toggleSelect(staff.id)}
+                  className={`flex items-center gap-3.5 rounded-2xl px-4 py-3 border cursor-pointer transition-all duration-200 group
+            ${
+              isSelected
+                ? "border-[#3525cc] bg-[#f7f6ff] shadow-[0_2px_12px_rgba(53,37,204,0.12)]"
+                : "border-gray-100 bg-white hover:border-[#3525cc]/20 hover:shadow-sm"
+            }`}
                 >
-                  {/* AVATAR */}
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 overflow-hidden transition-transform duration-200 group-hover:scale-105"
                     style={
@@ -884,8 +1007,6 @@ function ManageStaffPanel({
                       initials
                     )}
                   </div>
-
-                  {/* INFO */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-black/80 truncate leading-tight">
                       {staff.user.first_name} {staff.user.last_name}
@@ -894,50 +1015,34 @@ function ManageStaffPanel({
                       {staff.role}
                     </p>
                   </div>
-
-                  {/* ROLE PILL */}
                   <div
-                    className="flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full"
-                    style={{ background: "#eae6f5", color: "#3525cc" }}
+                    className={`w-5 h-5 rounded-md border-[1.5px] flex items-center justify-center flex-shrink-0 transition-all
+              ${isSelected ? "bg-[#3525cc] border-[#3525cc]" : "bg-white border-gray-300"}`}
                   >
-                    Assigned
+                    {isSelected && (
+                      <svg
+                        width="11"
+                        height="11"
+                        viewBox="0 0 12 12"
+                        fill="none"
+                      >
+                        <path
+                          d="M2 6l3 3 5-5"
+                          stroke="white"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
                   </div>
                 </div>
               );
             })}
-
-            {/* EMPTY STATE */}
-            {(!staffList || staffList.length === 0) && (
-              <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                  style={{ background: "#eae6f5" }}
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#3525cc"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <line x1="23" y1="11" x2="17" y2="11" />
-                    <line x1="20" y1="8" x2="20" y2="14" />
-                  </svg>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-semibold text-black/50">
-                    No staff assigned
-                  </p>
-                  <p className="text-xs text-black/30 mt-1">
-                    Assign staff members to this service
-                  </p>
-                </div>
-              </div>
+            {unassignedStaff.length === 0 && (
+              <p className="text-xs text-black/30 text-center py-4">
+                All staff are assigned
+              </p>
             )}
           </div>
         </div>
@@ -958,13 +1063,14 @@ function ManageStaffPanel({
               boxShadow: "0 4px 14px rgba(53,37,204,0.3)",
             }}
           >
-            Save Changes
+            Save Changes {selected.size > 0 ? `(+${selected.size})` : ""}
           </button>
         </div>
       </div>
     </>
   );
 }
+
 function getInitials(first: string, last: string) {
   return `${first?.[0] ?? ""}${last?.[0] ?? ""}`.toUpperCase();
 }
