@@ -6,6 +6,7 @@ import {
   updateService,
   getAssignedStaffInService,
   getUnassignedStaffInService,
+  assignStaff,
 } from "./service.api";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../../lib/queryKey";
@@ -63,7 +64,7 @@ export const useGetAllAssignedStaff = (id: string) => {
   return useQuery({
     queryKey: queryKeys.assignedStaff(businessId!, id),
     queryFn: () => getAssignedStaffInService(id),
-    enabled: !!id
+    enabled: !!id,
   });
 };
 
@@ -71,6 +72,28 @@ export const useGetAllUnAssignedStaff = (id: string) => {
   return useQuery({
     queryKey: queryKeys.unAssignedStaff(businessId!, id),
     queryFn: () => getUnassignedStaffInService(id),
-    enabled: !!id
+    enabled: !!id,
+  });
+};
+
+export const useAssignStaff = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      service_id,
+      staff_ids,
+    }: {
+      service_id: string;
+      staff_ids: string[];
+    }) => assignStaff({ service_id, staff_ids }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.assignedStaff(businessId!, variables.service_id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.unAssignedStaff(businessId!, variables.service_id),
+      });
+    },
   });
 };

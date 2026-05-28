@@ -23,7 +23,7 @@ import type {
   ServiceFormType,
   Service as ServiceType,
 } from "../../types/types";
-
+import { useAssignStaff } from "../../features/service/service.hook";
 /* =========================
    MAIN PAGE
 ========================= */
@@ -711,7 +711,7 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
   const [visible, setVisible] = useState(false);
   const { data: staffAssigned = [] } = useGetAllAssignedStaff(service.id);
   const { data: staffList = [] } = useGetAllUnAssignedStaff(service.id);
-
+  const assignStaffMutation = useAssignStaff()
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
   }, []);
@@ -729,8 +729,8 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
 
   const handleSave = () => {
     const toAssign = staffList.filter((s) => selected.has(s.id));
-    console.log("Assigning:", toAssign); // wire to your API here
-    handleClose();
+    const arrayIds = toAssign.map((item) => item.user_id)
+    assignStaffMutation.mutate({staff_ids: arrayIds, service_id: service.id})
   };
 
   const toggleSelect = (id: string) => {
