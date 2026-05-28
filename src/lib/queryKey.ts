@@ -14,7 +14,13 @@ export const queryKeys = {
   memberships: (business_id: string) => ["memberships", business_id],
 
   assignedStaff: (business_id: string, id: string) => [
-    "service-staffs",
+    "assigned-staffs",
+    business_id,
+    id,
+  ],
+
+  unAssignedStaff: (business_id: string, id: string) => [
+    "unassigned-staffs",
     business_id,
     id,
   ],
