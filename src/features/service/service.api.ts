@@ -35,3 +35,8 @@ export const assignStaff = async (data: {service_id: string, staff_ids: string[]
   const response = await api.post(`/service/assign`, data);
   return response.data;
 };
+
+export const removeAssignStaff = async (data: {service_id: string, staff_id: string}) => {
+  const response = await api.post(`/service/remove`, data);
+  return response.data;
+};

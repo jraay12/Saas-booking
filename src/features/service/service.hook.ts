@@ -7,6 +7,7 @@ import {
   getAssignedStaffInService,
   getUnassignedStaffInService,
   assignStaff,
+  removeAssignStaff,
 } from "./service.api";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../../lib/queryKey";
@@ -87,6 +88,28 @@ export const useAssignStaff = () => {
       service_id: string;
       staff_ids: string[];
     }) => assignStaff({ service_id, staff_ids }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.assignedStaff(businessId!, variables.service_id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.unAssignedStaff(businessId!, variables.service_id),
+      });
+    },
+  });
+};
+
+export const useRemoveAssignedStaff = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      service_id,
+      staff_id,
+    }: {
+      service_id: string;
+      staff_id: string;
+    }) => removeAssignStaff({ service_id, staff_id }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.assignedStaff(businessId!, variables.service_id),

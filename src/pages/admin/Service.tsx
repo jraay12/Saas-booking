@@ -17,6 +17,7 @@ import {
   useUpdateService,
   useGetAllAssignedStaff,
   useGetAllUnAssignedStaff,
+  useRemoveAssignedStaff,
 } from "../../features/service/service.hook";
 import type {
   AssignedStaff,
@@ -711,7 +712,10 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
   const [visible, setVisible] = useState(false);
   const { data: staffAssigned = [] } = useGetAllAssignedStaff(service.id);
   const { data: staffList = [] } = useGetAllUnAssignedStaff(service.id);
-  const assignStaffMutation = useAssignStaff()
+  const [displaySelectedCount, setDisplaySelectedCount] = useState(0);
+  const [showSelectionBanner, setShowSelectionBanner] = useState(false);
+  const assignStaffMutation = useAssignStaff();
+  const removeAssignedStaffMutation = useRemoveAssignedStaff();
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
   }, []);
@@ -727,10 +731,30 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
     requestAnimationFrame(() => setVisible(true));
   }, []);
 
+  useEffect(() => {
+    if (selected.size > 0) {
+      setDisplaySelectedCount(selected.size);
+      setShowSelectionBanner(true);
+    } else {
+      const timeout = setTimeout(() => {
+        setShowSelectionBanner(false);
+      }, 300);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [selected]);
+
   const handleSave = () => {
     const toAssign = staffList.filter((s) => selected.has(s.id));
-    const arrayIds = toAssign.map((item) => item.user_id)
-    assignStaffMutation.mutate({staff_ids: arrayIds, service_id: service.id})
+    const arrayIds = toAssign.map((item) => item.user_id);
+    assignStaffMutation.mutate(
+      { staff_ids: arrayIds, service_id: service.id },
+      {
+        onSuccess: () => {
+          setSelected(new Set());
+        },
+      },
+    );
   };
 
   const toggleSelect = (id: string) => {
@@ -741,10 +765,15 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
     });
   };
 
-  // Replace ASSIGNED_MOCK with your real assigned staff list prop
   const assignedStaff = staffAssigned;
-  const unassignedStaff = staffList; // already filtered unassigned from parent
+  const unassignedStaff = staffList;
 
+  const handleRemoveStaff = (staffId: string) => {
+    removeAssignedStaffMutation.mutate({
+      service_id: service.id,
+      staff_id: staffId,
+    });
+  };
   return (
     <>
       {/* OVERLAY */}
@@ -858,7 +887,6 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
         <div className="mx-6 border-t border-gray-100" />
 
         {/* ── BODY ── */}
-        {/* ── BODY ── */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
           {/* ASSIGNED SECTION */}
           <p className="text-[10px] font-bold uppercase tracking-widest text-black/25 mb-4">
@@ -903,11 +931,39 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
                       {staff.role}
                     </p> */}
                   </div>
-                  <div
-                    className="flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full"
-                    style={{ background: "#eae6f5", color: "#3525cc" }}
-                  >
-                    Assigned
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div
+                      className="text-[10px] font-semibold px-2.5 py-1 rounded-full transition-all"
+                      style={{ background: "#eae6f5", color: "#3525cc" }}
+                    >
+                      Assigned
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        handleRemoveStaff(staff.staff_id);
+                      }}
+                      className=" group-hover:opacity-100 transition-all duration-200
+    w-8 h-8 rounded-xl flex items-center justify-center
+    hover:bg-red-50 text-black/30 hover:text-red-500"
+                    >
+                      <svg
+                        width="15"
+                        height="15"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M3 6h18" />
+                        <path d="M8 6V4h8v2" />
+                        <path d="M19 6l-1 14H6L5 6" />
+                        <path d="M10 11v6" />
+                        <path d="M14 11v6" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               );
@@ -927,9 +983,16 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
             Available to Assign · {unassignedStaff.length}
           </p>
 
-          {selected.size > 0 && (
+          <div
+            className={`overflow-hidden transition-all duration-300 ease-out
+  ${
+    showSelectionBanner
+      ? "max-h-20 opacity-100 mb-3 translate-y-0"
+      : "max-h-0 opacity-0 mb-0 -translate-y-1"
+  }`}
+          >
             <div
-              className="text-[11px] font-semibold rounded-xl px-3 py-2 mb-3 flex items-center gap-1.5"
+              className="text-[11px] font-semibold rounded-xl px-3 py-2 flex items-center gap-1.5"
               style={{ background: "#f0eeff", color: "#3525cc" }}
             >
               <svg width="13" height="13" viewBox="0 0 12 12" fill="none">
@@ -941,9 +1004,9 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
                   strokeLinejoin="round"
                 />
               </svg>
-              {selected.size} selected — click Save to assign
+              {displaySelectedCount} selected — click Save to assign
             </div>
-          )}
+          </div>
 
           <div className="flex flex-col gap-2.5">
             {unassignedStaff.map((staff, index) => {
