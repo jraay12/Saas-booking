@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Clock, Plus, X, Copy } from "lucide-react";
-import { useCreateBusinessHours } from "../../features/business/business.hook";
+import {
+  useCreateBusinessHours,
+  useGetBusinessHours,
+} from "../../features/business/business.hook";
+import type { GetBusinessHoursResponse } from "../../types/types";
 const tabs = [
   { label: "Business Hours", value: "hours" },
   { label: "Booking Site", value: "site" },
@@ -37,6 +41,7 @@ const DEFAULT_SCHEDULE: DaySchedule = {
 const Settings = () => {
   const [active, setActive] = useState("hours");
   const createBusinessHoursMutation = useCreateBusinessHours();
+  const { data: fetchBusinessHours, isLoading } = useGetBusinessHours();
 
   // BOOKING SITE STATE
   const [bookingUrl, setBookingUrl] = useState(
@@ -87,7 +92,13 @@ const Settings = () => {
         })}
       </div>
 
-      {active === "hours" && <BusinessHoursTab onSubmit={handleSubmit} />}
+      {active === "hours" && (
+        <BusinessHoursTab
+          onSubmit={handleSubmit}
+          businessHoursData={fetchBusinessHours}
+          isLoading={isLoading}
+        />
+      )}
 
       {active === "site" && (
         <BookingSiteTab
@@ -105,8 +116,22 @@ export default Settings;
 
 /* ---------------- BUSINESS HOURS ---------------- */
 
-function BusinessHoursTab({ onSubmit }: { onSubmit: any }) {
+function BusinessHoursTab({
+  onSubmit,
+  businessHoursData,
+  isLoading,
+}: {
+  onSubmit: any;
+  businessHoursData: GetBusinessHoursResponse;
+  isLoading: boolean;
+}) {
   const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE.schedules);
+
+  useEffect(() => {
+    if (businessHoursData?.length) {
+      setSchedule(businessHoursData);
+    }
+  }, [businessHoursData]);
 
   const updateDay = (
     i: number,
@@ -140,6 +165,30 @@ function BusinessHoursTab({ onSubmit }: { onSubmit: any }) {
   const toggleDay = (i: number) => {
     updateDay(i, "is_closed", !schedule[i].is_closed);
   };
+
+  if (isLoading) {
+    return (
+      <div className="mt-6">
+        <h1 className="text-xl sm:text-2xl font-medium">
+          Availability Settings
+        </h1>
+
+        <p className="text-black/50 text-sm">
+          Configure when you are available for bookings.
+        </p>
+
+        <div className="bg-white mt-6 sm:mt-10 p-4 sm:p-6 rounded-xl border border-zinc-100">
+          <div className="flex items-center justify-center py-20">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-4 border-zinc-200 border-t-[#3525cc] rounded-full animate-spin" />
+
+              <p className="text-sm text-zinc-500">Loading business hours...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-6">

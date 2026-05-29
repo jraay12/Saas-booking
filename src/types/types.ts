@@ -44,3 +44,28 @@ export type Service = {
 export type ServiceFormType = Service & {
   cover_image?: File | null;
 };
+
+export type DayOfWeek =
+  | "MONDAY"
+  | "TUESDAY"
+  | "WEDNESDAY"
+  | "THURSDAY"
+  | "FRIDAY"
+  | "SATURDAY"
+  | "SUNDAY";
+
+export type BusinessHour = {
+  id: string;
+  business_id: string;
+  day: DayOfWeek;
+
+  open_time: string;
+  close_time: string;
+
+  is_closed: boolean;
+
+  created_at: string;
+  updated_at: string;
+};
+
+export type GetBusinessHoursResponse = BusinessHour[];
