@@ -1,29 +1,42 @@
 import { useState } from "react";
 import { Clock, Plus, X, Copy } from "lucide-react";
-
+import { useCreateBusinessHours } from "../../features/business/business.hook";
 const tabs = [
   { label: "Business Hours", value: "hours" },
   { label: "Booking Site", value: "site" },
 ];
 
 type DaySchedule = {
-  enabled: boolean;
-  start: string;
-  end: string;
-  breaks: { start: string; end: string }[];
+  schedules: {
+    day: string;
+    open_time: string;
+    close_time: string;
+    is_closed: boolean;
+  }[];
 };
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const DAYS = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+];
 
-const DEFAULT_SCHEDULE: DaySchedule[] = DAYS.map((_, i) => ({
-  enabled: i < 5,
-  start: "09:00",
-  end: "17:00",
-  breaks: [],
-}));
+const DEFAULT_SCHEDULE: DaySchedule = {
+  schedules: DAYS.map((day) => ({
+    day,
+    open_time: "08:00",
+    close_time: "17:00",
+    is_closed: false,
+  })),
+};
 
 const Settings = () => {
   const [active, setActive] = useState("hours");
+  const createBusinessHoursMutation = useCreateBusinessHours();
 
   // BOOKING SITE STATE
   const [bookingUrl, setBookingUrl] = useState(
@@ -38,8 +51,7 @@ const Settings = () => {
   };
 
   const handleSubmit = (data: any) => {
-    console.log("SUBMIT SETTINGS:", data);
-    // 🔥 send to API here
+    createBusinessHoursMutation.mutate(data);
   };
 
   return (
@@ -75,9 +87,7 @@ const Settings = () => {
         })}
       </div>
 
-      {active === "hours" && (
-        <BusinessHoursTab onSubmit={handleSubmit} />
-      )}
+      {active === "hours" && <BusinessHoursTab onSubmit={handleSubmit} />}
 
       {active === "site" && (
         <BookingSiteTab
@@ -96,164 +106,103 @@ export default Settings;
 /* ---------------- BUSINESS HOURS ---------------- */
 
 function BusinessHoursTab({ onSubmit }: { onSubmit: any }) {
-  const [schedule, setSchedule] = useState<DaySchedule[]>(
-    DEFAULT_SCHEDULE,
-  );
+  const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE.schedules);
 
-  const updateDay = (i: number, key: keyof DaySchedule, value: any) => {
+  const updateDay = (
+    i: number,
+    key: "open_time" | "close_time" | "is_closed",
+    value: string | boolean,
+  ) => {
     setSchedule((prev) =>
-      prev.map((d, idx) => (idx === i ? { ...d, [key]: value } : d)),
+      prev.map((d, idx) => {
+        if (idx !== i) return d;
+
+        const updated = {
+          ...d,
+          [key]: value,
+        };
+
+        // VALIDATION
+        if (
+          updated.open_time &&
+          updated.close_time &&
+          updated.close_time < updated.open_time
+        ) {
+          alert("Close time cannot be earlier than open time");
+          return d;
+        }
+
+        return updated;
+      }),
     );
   };
 
   const toggleDay = (i: number) => {
-    updateDay(i, "enabled", !schedule[i].enabled);
-  };
-
-  const updateBreak = (
-    dayIdx: number,
-    breakIdx: number,
-    key: "start" | "end",
-    value: string,
-  ) => {
-    const updated = [...schedule];
-    updated[dayIdx].breaks[breakIdx][key] = value;
-    setSchedule(updated);
-  };
-
-  const addBreak = (i: number) => {
-    const updated = [...schedule];
-    updated[i].breaks.push({ start: "12:00", end: "13:00" });
-    setSchedule(updated);
-  };
-
-  const removeBreak = (dayIdx: number, breakIdx: number) => {
-    const updated = [...schedule];
-    updated[dayIdx].breaks.splice(breakIdx, 1);
-    setSchedule(updated);
+    updateDay(i, "is_closed", !schedule[i].is_closed);
   };
 
   return (
     <div className="mt-6">
-      <h1 className="text-xl sm:text-2xl font-medium">
-        Availability Settings
-      </h1>
+      <h1 className="text-xl sm:text-2xl font-medium">Availability Settings</h1>
+
       <p className="text-black/50 text-sm">
         Configure when you are available for bookings.
       </p>
 
       <div className="bg-white mt-6 sm:mt-10 p-4 sm:p-6 rounded-xl border border-zinc-100">
-        <h2 className="font-medium text-lg sm:text-xl">
-          Weekly Schedule
-        </h2>
+        <h2 className="font-medium text-lg sm:text-xl">Weekly Schedule</h2>
 
         <div className="divide-y divide-zinc-100 mt-4">
-          {DAYS.map((day, i) => {
-            const d = schedule[i];
-
+          {schedule.map((d, i) => {
             return (
               <div
-                key={day}
+                key={d.day}
                 className="flex flex-col sm:flex-row sm:items-start gap-3 py-4"
               >
-                <span className="w-10 text-sm font-medium text-zinc-700 pt-1">
-                  {day}
+                <span className="w-24 text-sm font-medium text-zinc-700 pt-1">
+                  {d.day}
                 </span>
 
-                <Toggle
-                  on={d.enabled}
-                  onChange={() => toggleDay(i)}
-                />
+                <Toggle on={!d.is_closed} onChange={() => toggleDay(i)} />
 
-                {d.enabled ? (
+                {!d.is_closed ? (
                   <div className="flex flex-col gap-2 flex-1">
-                    {/* TIME ROW */}
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                       <input
                         type="time"
-                        value={d.start}
+                        value={d.open_time}
                         onChange={(e) =>
-                          updateDay(i, "start", e.target.value)
+                          updateDay(i, "open_time", e.target.value)
                         }
                         className="border border-zinc-200 rounded-lg px-2 py-1 text-sm w-full sm:w-auto"
                       />
 
-                      <span className="text-zinc-400 hidden sm:block">
-                        –
-                      </span>
+                      <span className="text-zinc-400 hidden sm:block">–</span>
 
                       <input
                         type="time"
-                        value={d.end}
+                        value={d.close_time}
                         onChange={(e) =>
-                          updateDay(i, "end", e.target.value)
+                          updateDay(i, "close_time", e.target.value)
                         }
                         className="border border-zinc-200 rounded-lg px-2 py-1 text-sm w-full sm:w-auto"
                       />
-
-                      {d.breaks.length === 0 && (
-                        <button
-                          onClick={() => addBreak(i)}
-                          className="text-indigo-600 text-sm flex items-center gap-1"
-                        >
-                          <Plus size={14} /> Add break
-                        </button>
-                      )}
                     </div>
-
-                    {/* BREAKS */}
-                    {d.breaks.map((br, bi) => (
-                      <div
-                        key={bi}
-                        className="flex flex-col sm:flex-row sm:items-center gap-2"
-                      >
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock size={14} />
-                          <input
-                            type="time"
-                            value={br.start}
-                            onChange={(e) =>
-                              updateBreak(
-                                i,
-                                bi,
-                                "start",
-                                e.target.value,
-                              )
-                            }
-                            className="border rounded px-2 py-1"
-                          />
-                          –
-                          <input
-                            type="time"
-                            value={br.end}
-                            onChange={(e) =>
-                              updateBreak(i, bi, "end", e.target.value)
-                            }
-                            className="border rounded px-2 py-1"
-                          />
-                        </div>
-
-                        <button
-                          onClick={() => removeBreak(i, bi)}
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
                   </div>
                 ) : (
-                  <span className="text-sm text-zinc-400 pt-1">
-                    Closed
-                  </span>
+                  <span className="text-sm text-zinc-400 pt-1">Closed</span>
                 )}
               </div>
             );
           })}
         </div>
 
-        {/* SUBMIT */}
         <button
-          onClick={() => onSubmit(schedule)}
+          onClick={() =>
+            onSubmit({
+              schedules: schedule,
+            })
+          }
           className="mt-6 bg-[#3525cc] text-white px-4 py-2 rounded-lg text-sm hover:opacity-90"
         >
           Save Changes
@@ -265,20 +214,13 @@ function BusinessHoursTab({ onSubmit }: { onSubmit: any }) {
 
 /* ---------------- BOOKING SITE ---------------- */
 
-function BookingSiteTab({
-  bookingUrl,
-  setBookingUrl,
-  copyLink,
-  copied,
-}: any) {
+function BookingSiteTab({ bookingUrl, setBookingUrl, copyLink, copied }: any) {
   return (
     <div className="mt-6 space-y-4">
       <h2 className="text-xl font-medium">Booking Site</h2>
 
       <div className="bg-white p-4 rounded-xl border space-y-3">
-        <label className="text-sm text-zinc-600">
-          Public Booking URL
-        </label>
+        <label className="text-sm text-zinc-600">Public Booking URL</label>
 
         <div className="flex flex-col sm:flex-row gap-2">
           <input
@@ -302,13 +244,7 @@ function BookingSiteTab({
 
 /* ---------------- TOGGLE ---------------- */
 
-function Toggle({
-  on,
-  onChange,
-}: {
-  on: boolean;
-  onChange: () => void;
-}) {
+function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
   return (
     <button
       onClick={onChange}
