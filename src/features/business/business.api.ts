@@ -9,3 +9,8 @@ export const getBusinessHours = async () => {
   const response = await api.get("/business-hours");
   return response.data.data;
 };
+
+export const getBusinessDetailsBySlug = async (slug: string) => {
+  const response = await api.get(`/business/${slug}`);
+  return response.data.data;
+};

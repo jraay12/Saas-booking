@@ -1,11 +1,16 @@
 import { Outlet } from "react-router";
 import PublicHeader from "../component/PublicHeader";
-import { business, services, staffs, timeSlots } from "../data/mockdata";
-import { useLocation } from "react-router";
-
+import { services, staffs, timeSlots } from "../data/mockdata";
+import { useLocation, useParams } from "react-router";
+import { useGetBusinessDetailsBySlug } from "../features/business/business.hook";
+import NotFound from "../pages/public/NotFoundPage";
 export default function PublicLayout() {
   const location = useLocation();
+  const { slug } = useParams();
 
+  const { data: business } = useGetBusinessDetailsBySlug(slug!);
+
+  if (!business) return <NotFound />;
   return (
     <div className="min-h-screen flex flex-col bg-[#f2f5f7]">
       {location.pathname !== "/login" && (

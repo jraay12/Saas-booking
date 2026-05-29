@@ -24,8 +24,10 @@ type ContextType = {
 export default function BookingPage() {
   const { business, services, staffs, timeSlots } =
     useOutletContext<ContextType>();
+
   const navigate = useNavigate();
   const { slug } = useParams();
+
   const categories = Array.from(
     new Set(services.map((item: any) => item.category)),
   );
@@ -77,7 +79,7 @@ export default function BookingPage() {
 
         <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 z-10">
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-black">
-            {business?.name}
+            {business?.business_name}
           </h1>
 
           <p className="text-sm sm:text-md text-black/70 max-w-2xl mt-2 sm:mt-4 font-medium">
@@ -86,7 +88,7 @@ export default function BookingPage() {
 
           <p className="text-xs sm:text-sm text-black flex items-center gap-1 mt-2 sm:mt-4 font-thin">
             <MapPin className="w-4" />
-            {business.address}
+            {business?.address}
           </p>
 
           <div className="mt-4 sm:mt-6 w-full sm:w-auto">
