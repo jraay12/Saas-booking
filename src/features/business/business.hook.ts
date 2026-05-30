@@ -4,6 +4,7 @@ import {
   createBusinessHours,
   getBusinessDetailsBySlug,
   getBusinessHours,
+  getBusinessHoursPublic,
 } from "./business.api";
 import { queryKeys } from "../../lib/queryKey";
 
@@ -28,10 +29,17 @@ export const useGetBusinessHours = () => {
   });
 };
 
+export const useGetBusinessHoursPublic = (business_id: string) => {
+  return useQuery({
+    queryFn: () => getBusinessHoursPublic(business_id),
+    queryKey: queryKeys.businessHours(business_id),
+  });
+};
+
 export const useGetBusinessDetailsBySlug = (slug: string) => {
   return useQuery({
     queryFn: () => getBusinessDetailsBySlug(slug),
     queryKey: queryKeys.businesses(businessId!),
-    enabled: !!slug
+    enabled: !!slug,
   });
 };

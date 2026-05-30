@@ -28,4 +28,6 @@ export const queryKeys = {
   businesses: (business_id: string) => ["businesses"],
 
   businessHours: (business_id: string) => ["business-hours", business_id],
+
+  availableSlots : (business_id: string, service_id: string, staff_id: string, date: string) => ['available-slots', business_id, service_id, staff_id, date]
 };

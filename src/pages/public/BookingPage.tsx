@@ -10,8 +10,14 @@ import {
   useGetAllAssignedStaffPublic,
   useGetAllServicesPublic,
 } from "../../features/service/service.hook";
-import type { AssignedStaff } from "../../types/types";
+import type {
+  AssignedStaff,
+  GetBusinessHoursResponse,
+} from "../../types/types";
 import { getInitials } from "../../utils/getInitial";
+import { useGetAvailableSlot } from "../../features/booking/booking.hook";
+import { useGetBusinessHoursPublic } from "../../features/business/business.hook";
+import { convertTo12Hours } from "../../utils/convertTimeTo12";
 /* =========================
    TYPES
 ========================= */
@@ -28,13 +34,21 @@ type ContextType = {
 ========================= */
 
 export default function BookingPage() {
-  const { business, timeSlots } = useOutletContext<ContextType>();
+  const { business } = useOutletContext<ContextType>();
   const [serviceSelected, setServiceSelected] = useState("");
+  const [selectedStaff, setSelectedStaff] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
   const { data: services } = useGetAllServicesPublic();
   const { data: staffs = [] } = useGetAllAssignedStaffPublic(serviceSelected);
-  console.log(staffs);
+  const { data: timeSlots } = useGetAvailableSlot(
+    business?.id ?? "",
+    serviceSelected,
+    selectedStaff,
+    selectedDate,
+  );
+  const { data: businessHours } = useGetBusinessHoursPublic(business?.id);
 
   const navigate = useNavigate();
   const { slug } = useParams();
@@ -49,8 +63,6 @@ export default function BookingPage() {
   const [categoryActive, setCategoryActive] = useState("All");
   const [filterService, setFilterService] = useState<string>("");
 
-  const [selectedStaff, setSelectedStaff] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
 
   const filteredService =
@@ -90,9 +102,8 @@ export default function BookingPage() {
       staff: selectedStaff,
       date: selectedDate,
       time: selectedTime,
-      totalPrice: serviceDetails?.amount,
+      totalPrice: serviceDetails?.price,
     };
-    console.log(payload);
 
     sessionStorage.setItem("booking", JSON.stringify(payload));
     navigate(`/booking/${slug}/confirmation`);
@@ -228,6 +239,7 @@ export default function BookingPage() {
                 selectedTime={selectedTime}
                 isServiceSelected={isServiceSelected}
                 isStaffSelected={isStaffSelected}
+                businessHours={businessHours}
               />
 
               <div className="w-full border border-gray-300 mt-10" />
@@ -239,7 +251,7 @@ export default function BookingPage() {
                   <>
                     <div className="flex flex-col mt-10">
                       <div className="flex justify-between">
-                        <p>{serviceDetails?.title}</p>
+                        <p>{serviceDetails?.service_name}</p>
                         <p>{serviceDetails?.price}</p>
                       </div>
 
@@ -282,6 +294,8 @@ type AppointmentCardProps = {
 
   isServiceSelected: boolean;
   isStaffSelected: boolean;
+
+  businessHours: GetBusinessHoursResponse;
 };
 
 function AppointmentCard({
@@ -298,6 +312,8 @@ function AppointmentCard({
 
   isServiceSelected,
   isStaffSelected,
+
+  businessHours,
 }: AppointmentCardProps) {
   return (
     <div className="flex flex-col">
@@ -318,7 +334,11 @@ function AppointmentCard({
       {!isStaffSelected ? (
         <p className="text-sm text-gray-400 mt-6"></p>
       ) : (
-        <DateSection onSelectDate={onSelectDate} selectedDate={selectedDate} />
+        <DateSection
+          onSelectDate={onSelectDate}
+          selectedDate={selectedDate}
+          businessHours={businessHours}
+        />
       )}
 
       {/* TIME */}
@@ -396,12 +416,12 @@ function StaffSection({ staffs, onSelect, selectedStaff }: StaffProps) {
             {/* STAFF ITEMS */}
             <div className="flex gap-4">
               {visibleStaffs?.map((staff: AssignedStaff) => {
-                const isSelected = selectedStaff === staff.id;
+                const isSelected = selectedStaff === staff.staff_id;
 
                 return (
                   <div
-                    key={staff.id}
-                    onClick={() => onSelect(staff.id)}
+                    key={staff.staff_id}
+                    onClick={() => onSelect(staff.staff_id)}
                     className="flex flex-col items-center"
                   >
                     {staff.staff.avatar ? (
@@ -459,9 +479,14 @@ function StaffSection({ staffs, onSelect, selectedStaff }: StaffProps) {
 type DateSectionProps = {
   onSelectDate: (value: string) => void;
   selectedDate: string;
+  businessHours: GetBusinessHoursResponse;
 };
 
-function DateSection({ onSelectDate, selectedDate }: DateSectionProps) {
+function DateSection({
+  onSelectDate,
+  selectedDate,
+  businessHours,
+}: DateSectionProps) {
   const getStartOfWeek = (date: Date) => {
     const newDate = new Date(date);
     const day = newDate.getDay();
@@ -521,6 +546,16 @@ function DateSection({ onSelectDate, selectedDate }: DateSectionProps) {
 
       <div className="grid grid-cols-7 gap-2">
         {weekDays.map((day) => {
+          const dayName = new Intl.DateTimeFormat("en-US", {
+            weekday: "long",
+          })
+            .format(day)
+            .toUpperCase();
+
+          const isClosed = businessHours.some(
+            (item) => item.day === dayName && item.is_closed,
+          );
+
           const today = new Date();
           today.setHours(0, 0, 0, 0);
 
@@ -537,13 +572,17 @@ function DateSection({ onSelectDate, selectedDate }: DateSectionProps) {
             <div
               key={day.toISOString()}
               onClick={() => {
-                if (isPastDay) return;
-                onSelectDate(day.toISOString());
+                if (isPastDay || isClosed) return;
+                const normalizedDate = new Date(day);
+                normalizedDate.setUTCHours(0, 0, 0, 0);
+                onSelectDate(normalizedDate.toISOString());
               }}
               className={`flex flex-col items-center justify-center p-2 rounded-lg border transition ${
                 isSelectedDate ? "bg-[#3525cc] text-white" : ""
               } ${
-                isPastDay ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+                isPastDay || isClosed
+                  ? "opacity-40 cursor-not-allowed"
+                  : "cursor-pointer"
               }`}
             >
               <span
@@ -594,7 +633,7 @@ function AvailableTimes({
               }`}
               onClick={() => onSelectTime(time)}
             >
-              {time}
+              {convertTo12Hours(time)}
             </button>
           );
         })}
