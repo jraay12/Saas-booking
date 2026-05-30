@@ -6,7 +6,12 @@ import Search from "../../component/Search";
 import ServiceCard from "../../component/ServiceCard";
 import { useNavigate, useParams } from "react-router";
 import NoService from "../../component/NoService";
-import { useGetAllServicesPublic } from "../../features/service/service.hook";
+import {
+  useGetAllAssignedStaffPublic,
+  useGetAllServicesPublic,
+} from "../../features/service/service.hook";
+import type { AssignedStaff } from "../../types/types";
+import { getInitials } from "../../utils/getInitial";
 /* =========================
    TYPES
 ========================= */
@@ -23,9 +28,13 @@ type ContextType = {
 ========================= */
 
 export default function BookingPage() {
-  const { business, staffs, timeSlots } = useOutletContext<ContextType>();
+  const { business, timeSlots } = useOutletContext<ContextType>();
+  const [serviceSelected, setServiceSelected] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
   const { data: services } = useGetAllServicesPublic();
+  const { data: staffs = [] } = useGetAllAssignedStaffPublic(serviceSelected);
+  console.log(staffs);
 
   const navigate = useNavigate();
   const { slug } = useParams();
@@ -40,7 +49,6 @@ export default function BookingPage() {
   const [categoryActive, setCategoryActive] = useState("All");
   const [filterService, setFilterService] = useState<string>("");
 
-  const [serviceSelected, setServiceSelected] = useState("");
   const [selectedStaff, setSelectedStaff] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -261,7 +269,7 @@ export default function BookingPage() {
 ========================= */
 
 type AppointmentCardProps = {
-  staffs: any[];
+  staffs: AssignedStaff[];
   selectedStaff: string;
   onStaffSelect: (value: string) => void;
 
@@ -387,7 +395,7 @@ function StaffSection({ staffs, onSelect, selectedStaff }: StaffProps) {
 
             {/* STAFF ITEMS */}
             <div className="flex gap-4">
-              {visibleStaffs?.map((staff) => {
+              {visibleStaffs?.map((staff: AssignedStaff) => {
                 const isSelected = selectedStaff === staff.id;
 
                 return (
@@ -396,18 +404,32 @@ function StaffSection({ staffs, onSelect, selectedStaff }: StaffProps) {
                     onClick={() => onSelect(staff.id)}
                     className="flex flex-col items-center"
                   >
-                    <img
-                      src={staff.avatar}
-                      className={`w-10 h-10 rounded-full cursor-pointer opacity-60 ${
-                        isSelected ? "opacity-100 ring-2 ring-blue-500" : ""
-                      }`}
-                    />
+                    {staff.staff.avatar ? (
+                      <img
+                        src={`${import.meta.env.VITE_IMAGE_PREFIX}${staff.staff.avatar}`}
+                        className={`w-10 h-10 rounded-full cursor-pointer opacity-60 ${
+                          isSelected ? "opacity-100 ring-2 ring-blue-500" : ""
+                        }`}
+                      />
+                    ) : (
+                      <div
+                        className={`flex items-center justify-center w-10 h-10 rounded-full bg-blue-600/50 text-bold font-medium cursor-pointer opacity-60 ${
+                          isSelected ? "opacity-100 ring-2 ring-blue-500" : ""
+                        }`}
+                      >
+                        {getInitials(
+                          staff.staff.first_name,
+                          staff.staff.last_name,
+                        )}
+                      </div>
+                    )}
+
                     <p
                       className={`text-xs ${
                         isSelected ? "text-black" : "text-black/50"
                       }`}
                     >
-                      {staff.name}
+                      {staff.staff.first_name} {staff.staff.last_name}
                     </p>
                   </div>
                 );

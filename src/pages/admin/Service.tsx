@@ -25,6 +25,7 @@ import type {
   Service as ServiceType,
 } from "../../types/types";
 import { useAssignStaff } from "../../features/service/service.hook";
+import { getInitials } from "../../utils/getInitial";
 /* =========================
    MAIN PAGE
 ========================= */
@@ -1113,6 +1114,4 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
   );
 }
 
-function getInitials(first: string, last: string) {
-  return `${first?.[0] ?? ""}${last?.[0] ?? ""}`.toUpperCase();
-}
+

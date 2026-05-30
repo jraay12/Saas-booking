@@ -31,6 +31,11 @@ export const getAssignedStaffInService = async (id: string) => {
   return response.data;
 };
 
+export const getAssignedStaffInServicePublic = async (id: string) => {
+  const response = await api.get(`/service/${id}/assigned/public`);
+  return response.data;
+};
+
 export const getUnassignedStaffInService = async (id: string): Promise<StaffMember[]> => {
   const response = await api.get(`/service/${id}/unassigned`);
   return response.data;
