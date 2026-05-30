@@ -1,11 +1,12 @@
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { useOutletContext } from "react-router";
 import Button from "../../component/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Search from "../../component/Search";
 import ServiceCard from "../../component/ServiceCard";
 import { useNavigate, useParams } from "react-router";
 import NoService from "../../component/NoService";
+import { useGetAllServicesPublic } from "../../features/service/service.hook";
 /* =========================
    TYPES
 ========================= */
@@ -22,17 +23,21 @@ type ContextType = {
 ========================= */
 
 export default function BookingPage() {
-  const { business, services, staffs, timeSlots } =
-    useOutletContext<ContextType>();
+  const { business, staffs, timeSlots } = useOutletContext<ContextType>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const { data: services } = useGetAllServicesPublic();
 
   const navigate = useNavigate();
   const { slug } = useParams();
 
-  const categories = Array.from(
-    new Set(services.map((item: any) => item.category)),
-  );
+  const categories = [
+    "All",
+    ...Array.from(new Set(services?.map((item: any) => item.category))),
+  ];
 
-  const [categoryActive, setCategoryActive] = useState(categories[0]);
+  const ITEMS_PER_PAGE = 3;
+
+  const [categoryActive, setCategoryActive] = useState("All");
   const [filterService, setFilterService] = useState<string>("");
 
   const [serviceSelected, setServiceSelected] = useState("");
@@ -40,11 +45,30 @@ export default function BookingPage() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
 
-  const filteredService = services.filter(
-    (item: any) => item.category === categoryActive,
+  const filteredService =
+    services?.filter((item: any) => {
+      const matchesCategory =
+        categoryActive === "All" || item.category === categoryActive;
+
+      const matchesSearch = item.service_name
+        .toLowerCase()
+        .includes(filterService.toLowerCase());
+
+      return matchesCategory && matchesSearch;
+    }) || [];
+
+  const totalPages = Math.ceil(filteredService.length / ITEMS_PER_PAGE);
+
+  const paginatedServices = filteredService.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
   );
 
-  const serviceDetails = services.find(
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryActive, filterService]);
+
+  const serviceDetails = services?.find(
     (item: any) => item.id === serviceSelected,
   );
 
@@ -99,7 +123,7 @@ export default function BookingPage() {
 
       {/* GRID */}
       <div className="w-full grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 mt-10 sm:mt-20 items-start">
-        {!services || services.length === 0 ? (
+        {!services || services?.length === 0 ? (
           <div className="col-span-full flex items-center justify-center min-h-[60vh]">
             <NoService />
           </div>
@@ -132,7 +156,7 @@ export default function BookingPage() {
               </div>
 
               <div className="flex flex-col gap-4 mt-4">
-                {filteredService.map((item: any) => (
+                {paginatedServices.map((item: any) => (
                   <ServiceCard
                     key={item.id}
                     service={item}
@@ -148,6 +172,39 @@ export default function BookingPage() {
                   />
                 ))}
               </div>
+              {totalPages > 1 && (
+                <div className="flex items-center justify-end gap-2 mt-8 flex-wrap">
+                  <button
+                    className="px-3 py-2 border rounded disabled:opacity-50 cursor-pointer"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((prev) => prev - 1)}
+                  >
+                    Previous
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentPage(index + 1)}
+                      className={`w-10 h-10 rounded cursor-pointer ${
+                        currentPage === index + 1
+                          ? "bg-[#3525cc] text-white"
+                          : "border"
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+
+                  <button
+                    className="px-3 py-2 border rounded disabled:opacity-50 cursor-pointer"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* RIGHT */}
@@ -175,12 +232,12 @@ export default function BookingPage() {
                     <div className="flex flex-col mt-10">
                       <div className="flex justify-between">
                         <p>{serviceDetails?.title}</p>
-                        <p>{serviceDetails?.amount}</p>
+                        <p>{serviceDetails?.price}</p>
                       </div>
 
                       <div className="flex justify-between">
                         <p>Total</p>
-                        <p>{serviceDetails?.amount}</p>
+                        <p>{serviceDetails?.price}</p>
                       </div>
                     </div>
 

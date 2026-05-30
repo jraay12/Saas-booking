@@ -2,11 +2,17 @@ import { Banknote, Check, Timer } from "lucide-react";
 
 type Service = {
   id: string;
-  title: string;
-  description: string;
-  minutes: number;
-  amount: number;
+  business_id: string;
+  service_name: string;
   category: string;
+  description: string | null;
+  price: string;
+  hour: number;
+  minute: number;
+  image_path: string | null;
+  is_active: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type Props = {
@@ -29,23 +35,27 @@ const ServiceCard = ({ service, serviceSelected, onSelect }: Props) => {
         </div>
       )}
 
-      <div className={`absolute top-11 hidden md:block  bg-[#f5f2ff] text-black text-xs ${serviceSelected === service.id ? "px-2 right-8": "px-4 right-4"}  py-2 rounded-md shadow-md `}>
+      <div
+        className={`absolute top-11 hidden md:block  bg-[#f5f2ff] text-black text-xs ${serviceSelected === service.id ? "px-2 right-8" : "px-4 right-4"}  py-2 rounded-md shadow-md `}
+      >
         {serviceSelected === service.id ? <Check /> : "Select"}
       </div>
 
-      <h1 className="text-xl font-medium">{service.title}</h1>
+      <h1 className="text-xl font-medium">{service.service_name}</h1>
 
-      <p className="text-xs text-black/70 font-medium">{service.description}</p>
+      <p className="text-xs text-black/70 font-medium max-w-5/6">
+        {service.description}
+      </p>
 
       <div className="flex mt-2 gap-4 items-center">
         <div className="flex items-center gap-1 text-black/50">
           <Timer className="w-4" />
-          <p className="text-xs">{service.minutes} min</p>
+          <p className="text-xs">{service.minute} min</p>
         </div>
 
         <div className="flex items-center gap-1 text-[#3525cc] font-bold">
           <Banknote className="w-4" />
-          <p className="text-xs">From {service.amount}</p>
+          <p className="text-xs">From {service.price}</p>
         </div>
       </div>
     </div>

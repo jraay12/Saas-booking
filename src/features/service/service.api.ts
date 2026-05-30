@@ -11,6 +11,11 @@ export const getAllService = async () => {
   return response.data;
 };
 
+export const getAllServicePublic = async () => {
+  const response = await api.get("/service/public");
+  return response.data;
+};
+
 export const toggleStatus = async (id: string) => {
   const response = await api.post(`/service/${id}/toggle-status`);
   return response.data;

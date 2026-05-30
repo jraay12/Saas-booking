@@ -8,6 +8,7 @@ import {
   getUnassignedStaffInService,
   assignStaff,
   removeAssignStaff,
+  getAllServicePublic,
 } from "./service.api";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../../lib/queryKey";
@@ -31,6 +32,13 @@ export const useGetAllServices = () => {
   return useQuery({
     queryKey: queryKeys.services(businessId!),
     queryFn: getAllService,
+  });
+};
+
+export const useGetAllServicesPublic = () => {
+  return useQuery({
+    queryKey: queryKeys.services(businessId!),
+    queryFn: getAllServicePublic,
   });
 };
 
