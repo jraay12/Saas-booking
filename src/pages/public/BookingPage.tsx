@@ -39,7 +39,7 @@ export default function BookingPage() {
   const [selectedStaff, setSelectedStaff] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-
+  
   const { data: services } = useGetAllServicesPublic();
   const { data: staffs = [] } = useGetAllAssignedStaffPublic(serviceSelected);
   const { data: timeSlots } = useGetAvailableSlot(
@@ -103,6 +103,7 @@ export default function BookingPage() {
       date: selectedDate,
       time: selectedTime,
       totalPrice: serviceDetails?.price,
+      business_id: business?.id
     };
 
     sessionStorage.setItem("booking", JSON.stringify(payload));

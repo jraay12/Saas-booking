@@ -15,9 +15,12 @@ import Button from "../../component/Button";
 import { useGetServiceById } from "../../features/service/service.hook";
 import { convertTo12Hours } from "../../utils/convertTimeTo12";
 import { useGetStaffById } from "../../features/staff/staff.hook";
+import type { CreateBookingRequest } from "../../types/types";
+import { useCreateBooking } from "../../features/booking/booking.hook";
 
 const BookingConfirmation = () => {
   const booking = JSON.parse(sessionStorage.getItem("booking") || "null");
+  const bookingMutation = useCreateBooking();
   const navigate = useNavigate();
   const { slug } = useParams();
 
@@ -49,18 +52,28 @@ const BookingConfirmation = () => {
   };
 
   const handleConfirmBooking = () => {
-    const payload = {
-      ...booking,
-      customer: form,
+    const payload: CreateBookingRequest = {
+      booking_date: booking.date,
+      email_address: form.email,
+      first_name: form.firstName,
+      last_name: form.lastName,
+      payment_method: "CASH",
+      phone_number: form.phone,
+      aditional_notes: form.notes ?? "",
+      service_id: booking.service,
+      service_price: booking.totalPrice,
+      staff_id: booking.staff,
+      start_time: booking.time,
     };
 
-    console.log(payload);
-
-    // API request here
+    bookingMutation.mutate(
+      { business_id: booking.business_id, data: payload },
+      { onSuccess: () => navigate(`/service/${slug}`) },
+    );
   };
 
   const { data: serviceDetails } = useGetServiceById(booking.service);
-  console.log(serviceDetails)
+
   const { data: staffDetails } = useGetStaffById(booking.staff);
 
   const handleBackToSchedule = () => {
@@ -237,7 +250,11 @@ const BookingConfirmation = () => {
             </div>
 
             <div className="flex flex-col items-center gap-4">
-              <Button name="Confirm Booking" className="w-full" />
+              <Button
+                name="Confirm Booking"
+                className="w-full"
+                onClick={() => handleConfirmBooking()}
+              />
               <div
                 className="text-[#3525cc] flex gap-1 cursor-pointer"
                 onClick={() => handleBackToSchedule()}

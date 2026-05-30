@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { getAvailableSlot } from "./booking.api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createBooking, getAvailableSlot } from "./booking.api";
 import { queryKeys } from "../../lib/queryKey";
+import type { CreateBookingRequest } from "../../types/types";
 
 export const useGetAvailableSlot = (
   business_id: string,
@@ -12,5 +13,28 @@ export const useGetAvailableSlot = (
     queryKey: queryKeys.availableSlots(business_id, service_id, staff_id, date),
     queryFn: () => getAvailableSlot(business_id, service_id, staff_id, date!),
     enabled: !!business_id && !!service_id && !!staff_id && !!date,
+  });
+};
+
+export const useCreateBooking = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      business_id,
+      data,
+    }: {
+      business_id: string;
+      data: CreateBookingRequest;
+    }) => createBooking(business_id, data),
+    onSuccess: (_, { business_id, data }) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.availableSlots(
+          business_id,
+          data.service_id,
+          data.staff_id,
+          data.booking_date,
+        ),
+      });
+    },
   });
 };

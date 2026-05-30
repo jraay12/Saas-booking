@@ -69,3 +69,24 @@ export type BusinessHour = {
 };
 
 export type GetBusinessHoursResponse = BusinessHour[];
+
+export type CreateBookingRequest = {
+  service_id: string;
+  staff_id: string;
+
+  first_name: string;
+  last_name: string;
+
+  email_address: string;
+  phone_number: string;
+
+  aditional_notes?: string;
+
+  payment_method: "CASH" | "GCASH";
+
+  booking_date: string;
+
+  service_price: number;
+
+  start_time: string;
+};

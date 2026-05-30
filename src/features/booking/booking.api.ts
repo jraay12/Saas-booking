@@ -1,4 +1,6 @@
+import { business } from "../../data/mockdata";
 import { api } from "../../lib/axios";
+import type { CreateBookingRequest } from "../../types/types";
 
 export const getAvailableSlot = async (
   business_id: string,
@@ -15,3 +17,9 @@ export const getAvailableSlot = async (
   });
   return response.data.data;
 };
+
+
+export const createBooking = async (business_id: string, data: CreateBookingRequest) => {
+  const response = await api.post(`/booking/${business_id}`, data);
+  return response.data.data;
+}
