@@ -32,8 +32,8 @@ function App() {
             element={<BookingConfirmation />}
           />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/login" element={<LoginPage />} />
         </Route>
+        <Route path="/login" element={<LoginPage />} />
 
         <Route
           element={

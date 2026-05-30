@@ -8,9 +8,9 @@ export default function PublicLayout() {
   const location = useLocation();
   const { slug } = useParams();
 
-  const { data: business } = useGetBusinessDetailsBySlug(slug!);
+  const { data: business, isLoading } = useGetBusinessDetailsBySlug(slug!);
 
-  if (!business) return <NotFound />;
+  if (!business && !isLoading) return <NotFound />;
   return (
     <div className="min-h-screen flex flex-col bg-[#f2f5f7]">
       {location.pathname !== "/login" && (
