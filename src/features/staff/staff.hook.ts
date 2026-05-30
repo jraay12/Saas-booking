@@ -1,15 +1,22 @@
 import { queryKeys } from "../../lib/queryKey";
-import { createStaff, getStaffMembers, deleteMembershipStaff } from "./staff.api";
+import {
+  createStaff,
+  getStaffMembers,
+  deleteMembershipStaff,
+  getStaffById,
+} from "./staff.api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getBusinessId } from "../../lib/decoder";
 
-const businessId = getBusinessId()
+const businessId = getBusinessId();
 export const useCreateStaff = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createStaff,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.staffs(businessId!) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.staffs(businessId!),
+      });
     },
   });
 };
@@ -32,5 +39,12 @@ export const useDeleteMembershipStaff = () => {
         queryKey: queryKeys.staffs(businessId!),
       });
     },
+  });
+};
+
+export const useGetStaffById = (id: string) => {
+  return useQuery({
+    queryKey: queryKeys.staff(businessId!, id),
+    queryFn: () => getStaffById(id),
   });
 };

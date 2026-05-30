@@ -12,9 +12,9 @@ import { Navigate, useParams, useNavigate } from "react-router";
 import { useState } from "react";
 import Input from "../../component/Input";
 import Button from "../../component/Button";
-import { services, staffs } from "../../data/mockdata";
 import { useGetServiceById } from "../../features/service/service.hook";
 import { convertTo12Hours } from "../../utils/convertTimeTo12";
+import { useGetStaffById } from "../../features/staff/staff.hook";
 
 const BookingConfirmation = () => {
   const booking = JSON.parse(sessionStorage.getItem("booking") || "null");
@@ -59,10 +59,9 @@ const BookingConfirmation = () => {
     // API request here
   };
 
-  const {data: serviceDetails} = useGetServiceById(booking.service)
+  const { data: serviceDetails } = useGetServiceById(booking.service);
   console.log(serviceDetails)
-
-  const staffDetails = staffs.find((item) => item.id === booking.staff);
+  const { data: staffDetails } = useGetStaffById(booking.staff);
 
   const handleBackToSchedule = () => {
     navigate(-1);
@@ -166,6 +165,22 @@ const BookingConfirmation = () => {
           </div>
 
           <div className="space-y-5 bg-white border border-gray-300 p-6 shadow-sm h-fit sticky top-5">
+            <div className="w-full h-36 rounded-xl overflow-hidden bg-[#e1deff] flex items-center justify-center">
+              {serviceDetails?.image_path ? (
+                <img
+                  src={`${import.meta.env.VITE_IMAGE_PREFIX}${serviceDetails.image_path}`}
+                  alt={serviceDetails.service_name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-[#7c6fd9]">
+                  <BriefcaseBusiness size={36} className="opacity-60" />
+                  <p className="text-xs font-medium opacity-60">
+                    No Image Available
+                  </p>
+                </div>
+              )}
+            </div>
             <div className="flex flex-col">
               <h1 className="text-[#3525cc] font-medium">SERVICE</h1>
               <p className="font-bold">{serviceDetails?.service_name}</p>
@@ -181,7 +196,9 @@ const BookingConfirmation = () => {
 
               <div>
                 <p className="text-sm text-black/50">Staff</p>
-                <h4 className="font-medium">{staffDetails?.name}</h4>
+                <h4 className="font-medium">
+                  {staffDetails?.first_name} {staffDetails?.last_name}
+                </h4>
               </div>
             </div>
 
@@ -205,7 +222,9 @@ const BookingConfirmation = () => {
 
               <div>
                 <p className="text-sm text-black/50">Time</p>
-                <h4 className="font-medium">{convertTo12Hours(booking.time)}</h4>
+                <h4 className="font-medium">
+                  {convertTo12Hours(booking.time)}
+                </h4>
               </div>
             </div>
 

@@ -15,3 +15,8 @@ export const deleteMembershipStaff = async (user_id: string) => {
 
   return response.data.data;
 };
+
+export const getStaffById = async (id: string) => {
+  const response = await api.get(`/user/${id}`);
+  return response.data;
+};
