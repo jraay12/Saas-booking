@@ -13,6 +13,8 @@ import { useState } from "react";
 import Input from "../../component/Input";
 import Button from "../../component/Button";
 import { services, staffs } from "../../data/mockdata";
+import { useGetServiceById } from "../../features/service/service.hook";
+import { convertTo12Hours } from "../../utils/convertTimeTo12";
 
 const BookingConfirmation = () => {
   const booking = JSON.parse(sessionStorage.getItem("booking") || "null");
@@ -57,7 +59,9 @@ const BookingConfirmation = () => {
     // API request here
   };
 
-  const serviceDetails = services.find((item) => item.id === booking.service);
+  const {data: serviceDetails} = useGetServiceById(booking.service)
+  console.log(serviceDetails)
+
   const staffDetails = staffs.find((item) => item.id === booking.staff);
 
   const handleBackToSchedule = () => {
@@ -164,10 +168,10 @@ const BookingConfirmation = () => {
           <div className="space-y-5 bg-white border border-gray-300 p-6 shadow-sm h-fit sticky top-5">
             <div className="flex flex-col">
               <h1 className="text-[#3525cc] font-medium">SERVICE</h1>
-              <p className="font-bold">{serviceDetails?.title}</p>
+              <p className="font-bold">{serviceDetails?.service_name}</p>
               <div className="flex text-xs items-center text-black/60 gap-1">
                 <Timer className="w-4" />
-                <p className="">{serviceDetails?.minutes} mins</p>
+                <p className="">{serviceDetails?.minute} mins</p>
               </div>
             </div>
             <div className="pb-4 border-b border-gray-300"></div>
@@ -201,7 +205,7 @@ const BookingConfirmation = () => {
 
               <div>
                 <p className="text-sm text-black/50">Time</p>
-                <h4 className="font-medium">{booking.time}</h4>
+                <h4 className="font-medium">{convertTo12Hours(booking.time)}</h4>
               </div>
             </div>
 

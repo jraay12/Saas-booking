@@ -36,17 +36,30 @@ export const getAssignedStaffInServicePublic = async (id: string) => {
   return response.data;
 };
 
-export const getUnassignedStaffInService = async (id: string): Promise<StaffMember[]> => {
+export const getUnassignedStaffInService = async (
+  id: string,
+): Promise<StaffMember[]> => {
   const response = await api.get(`/service/${id}/unassigned`);
   return response.data;
 };
 
-export const assignStaff = async (data: {service_id: string, staff_ids: string[]}) => {
+export const assignStaff = async (data: {
+  service_id: string;
+  staff_ids: string[];
+}) => {
   const response = await api.post(`/service/assign`, data);
   return response.data;
 };
 
-export const removeAssignStaff = async (data: {service_id: string, staff_id: string}) => {
+export const removeAssignStaff = async (data: {
+  service_id: string;
+  staff_id: string;
+}) => {
   const response = await api.post(`/service/remove`, data);
+  return response.data;
+};
+
+export const getServiceById = async (id: string) => {
+  const response = await api.get(`/service/${id}`);
   return response.data;
 };
