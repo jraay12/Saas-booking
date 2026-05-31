@@ -12,7 +12,10 @@ import {
   Search,
   Mail,
 } from "lucide-react";
-import { useFetchAllBookings } from "../../features/booking/booking.hook";
+import {
+  useCancelBooking,
+  useFetchAllBookings,
+} from "../../features/booking/booking.hook";
 import type { Booking } from "../../types/types";
 import { convertTo12Hours } from "../../utils/convertTimeTo12";
 import { useConfirmBooking } from "../../features/booking/booking.hook";
@@ -190,6 +193,7 @@ function SidePanel({
   setSelected: React.Dispatch<React.SetStateAction<Booking | null>>;
 }) {
   const confirmBookingMutation = useConfirmBooking();
+  const cancelBookingMutation = useCancelBooking();
 
   const handleConfirmBooking = () => {
     confirmBookingMutation.mutate(
@@ -201,6 +205,24 @@ function SidePanel({
               ? {
                   ...prev,
                   status: "CONFIRMED",
+                }
+              : null,
+          );
+        },
+      },
+    );
+  };
+
+  const handleCancelBooking = () => {
+    cancelBookingMutation.mutate(
+      { id: selected?.id! },
+      {
+        onSuccess: () => {
+          setSelected((prev: any) =>
+            prev
+              ? {
+                  ...prev,
+                  status: "CANCELLED",
                 }
               : null,
           );
@@ -431,16 +453,21 @@ function SidePanel({
               Confirm Booking
             </button>
           )}
-          <div className="grid grid-cols-2 gap-2">
-            <button className="py-2.5 rounded-xl bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 active:scale-[0.98] text-[12px] font-medium text-zinc-700 transition-all duration-150 cursor-pointer">
-              Reschedule
-            </button>
-            <button className="py-2.5 rounded-xl bg-red-50 border border-red-200 hover:bg-red-100 active:scale-[0.98] text-[12px] font-medium text-red-500 transition-all duration-150 cursor-pointer">
-              {statusKey === "canceled" || statusKey === "cancelled"
-                ? "Remove"
-                : "Cancel"}
-            </button>
-          </div>
+          {statusKey !== "canceled" && statusKey !== "cancelled" && (
+            <div className="grid grid-cols-2 gap-2">
+              <button className="py-2.5 rounded-xl bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 active:scale-[0.98] text-[12px] font-medium text-zinc-700 transition-all duration-150 cursor-pointer">
+                Reschedule
+              </button>
+              <button
+                onClick={() => handleCancelBooking()}
+                className="py-2.5 rounded-xl bg-red-50 border border-red-200 hover:bg-red-100 active:scale-[0.98] text-[12px] font-medium text-red-500 transition-all duration-150 cursor-pointer"
+              >
+                {statusKey === "canceled" || statusKey === "cancelled"
+                  ? "Remove"
+                  : "Cancel Booking"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
