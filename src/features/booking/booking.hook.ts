@@ -1,10 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createBooking, fetchAllBookings, getAvailableSlot } from "./booking.api";
+import {
+  confirmBooking,
+  createBooking,
+  fetchAllBookings,
+  getAvailableSlot,
+} from "./booking.api";
 import { queryKeys } from "../../lib/queryKey";
 import type { CreateBookingRequest } from "../../types/types";
 import { getBusinessId } from "../../lib/decoder";
 
-const business_id = getBusinessId()
+const business_id = getBusinessId();
 export const useGetAvailableSlot = (
   business_id: string,
   service_id: string,
@@ -42,8 +47,25 @@ export const useCreateBooking = () => {
 };
 
 export const useFetchAllBookings = () => {
- return useQuery({
-  queryFn: fetchAllBookings,
-  queryKey: queryKeys.bookings(business_id!)
- })
-}
+  return useQuery({
+    queryFn: fetchAllBookings,
+    queryKey: queryKeys.bookings(business_id!),
+  });
+};
+
+export const useConfirmBooking = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id }: { id: string }) => confirmBooking(id),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.bookings(business_id!),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.booking(business_id!, id),
+      });
+    },
+  });
+};

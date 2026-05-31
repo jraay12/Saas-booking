@@ -29,3 +29,9 @@ export const fetchAllBookings = async (): Promise<GetBookingsResponse> => {
   const response = await api.get("/booking");
   return response.data;
 };
+
+
+export const confirmBooking = async (id: string) => {
+  const response = await api.patch(`/booking/${id}/confirm`);
+  return response.data;
+};

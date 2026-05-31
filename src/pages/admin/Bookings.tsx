@@ -15,7 +15,7 @@ import {
 import { useFetchAllBookings } from "../../features/booking/booking.hook";
 import type { Booking } from "../../types/types";
 import { convertTo12Hours } from "../../utils/convertTimeTo12";
-
+import { useConfirmBooking } from "../../features/booking/booking.hook";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Variant = "total" | "pending" | "confirmed" | "completed" | "canceled";
@@ -183,10 +183,31 @@ function StatusBadge({ status }: { status: string }) {
 function SidePanel({
   selected,
   onClose,
+  setSelected,
 }: {
   selected: Booking | null;
   onClose: () => void;
+  setSelected: React.Dispatch<React.SetStateAction<Booking | null>>;
 }) {
+  const confirmBookingMutation = useConfirmBooking();
+
+  const handleConfirmBooking = () => {
+    confirmBookingMutation.mutate(
+      { id: selected?.id! },
+      {
+        onSuccess: () => {
+          setSelected((prev: any) =>
+            prev
+              ? {
+                  ...prev,
+                  status: "CONFIRMED",
+                }
+              : null,
+          );
+        },
+      },
+    );
+  };
   if (!selected) {
     return (
       <div className="fixed inset-0 z-50 pointer-events-none">
@@ -225,9 +246,10 @@ function SidePanel({
   const initials = getInitials(selected.first_name, selected.last_name);
 
   // Short booking reference from id
-  const bookingRef = selected.id.length > 8
-    ? `#${selected.id.slice(0, 8).toUpperCase()}`
-    : `#${selected.id}`;
+  const bookingRef =
+    selected.id.length > 8
+      ? `#${selected.id.slice(0, 8).toUpperCase()}`
+      : `#${selected.id}`;
 
   return (
     <div className="fixed inset-0 z-50 pointer-events-auto">
@@ -372,7 +394,10 @@ function SidePanel({
               <div className="px-4 py-2.5 flex items-center justify-between border-b border-zinc-100">
                 <span className="text-[12px] text-zinc-400">Subtotal</span>
                 <span className="text-[12px] text-zinc-700">
-                  ₱{parseFloat(selected.service_price).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
+                  ₱
+                  {parseFloat(selected.service_price).toLocaleString("en-PH", {
+                    minimumFractionDigits: 2,
+                  })}
                 </span>
               </div>
               <div className="px-4 py-2.5 flex items-center justify-between">
@@ -381,7 +406,11 @@ function SidePanel({
                 </span>
                 <div className="text-right">
                   <span className="text-[13px] font-bold text-zinc-900 block">
-                    ₱{parseFloat(selected.service_price).toLocaleString("en-PH", { minimumFractionDigits: 2 })}
+                    ₱
+                    {parseFloat(selected.service_price).toLocaleString(
+                      "en-PH",
+                      { minimumFractionDigits: 2 },
+                    )}
                   </span>
                   <span className="text-[10px] font-semibold text-red-500 uppercase tracking-wide">
                     Unpaid
@@ -395,7 +424,10 @@ function SidePanel({
         {/* Footer */}
         <div className="px-4 py-3.5 border-t border-zinc-100 bg-white flex flex-col gap-2 shrink-0">
           {statusKey === "pending" && (
-            <button className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white text-[13px] font-semibold transition-all duration-150 cursor-pointer">
+            <button
+              onClick={() => handleConfirmBooking()}
+              className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white text-[13px] font-semibold transition-all duration-150 cursor-pointer"
+            >
               Confirm Booking
             </button>
           )}
@@ -417,7 +449,13 @@ function SidePanel({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-const FILTER_STATUSES = ["all", "pending", "confirmed", "completed", "canceled"] as const;
+const FILTER_STATUSES = [
+  "all",
+  "pending",
+  "confirmed",
+  "completed",
+  "canceled",
+] as const;
 
 const Bookings = () => {
   const [selected, setSelected] = useState<Booking | null>(null);
@@ -429,15 +467,12 @@ const Bookings = () => {
 
   const stats = {
     total: bookings.length,
-    pending: bookings.filter(
-      (b) => normalizeStatus(b.status) === "pending",
-    ).length,
-    confirmed: bookings.filter(
-      (b) => normalizeStatus(b.status) === "confirmed",
-    ).length,
-    completed: bookings.filter(
-      (b) => normalizeStatus(b.status) === "completed",
-    ).length,
+    pending: bookings.filter((b) => normalizeStatus(b.status) === "pending")
+      .length,
+    confirmed: bookings.filter((b) => normalizeStatus(b.status) === "confirmed")
+      .length,
+    completed: bookings.filter((b) => normalizeStatus(b.status) === "completed")
+      .length,
     canceled: bookings.filter((b) =>
       ["canceled", "cancelled"].includes(normalizeStatus(b.status)),
     ).length,
@@ -639,7 +674,11 @@ const Bookings = () => {
 
       {/* Side panel */}
       {selected && (
-        <SidePanel selected={selected} onClose={() => setSelected(null)} />
+        <SidePanel
+          selected={selected}
+          onClose={() => setSelected(null)}
+          setSelected={setSelected}
+        />
       )}
     </div>
   );
