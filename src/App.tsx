@@ -14,6 +14,10 @@ import RegisterPage from "./pages/public/RegisterPage";
 import LoginPage from "./pages/public/LoginPage";
 import ProtectedRoute from "./router/ProtectedRoutes";
 import PublicRoute from "./router/PublicRoutes";
+import StaffLayout from "./layout/StaffLayout";
+import StaffBookingPage from "./pages/staff/BookingPage";
+import StaffDashboard from "./pages/staff/StaffDashboard";
+import StaffSettings from "./pages/staff/StaffSettings";
 function App() {
   return (
     <>
@@ -32,12 +36,12 @@ function App() {
             element={<BookingConfirmation />}
           />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={<LoginPage />} />
         </Route>
-        <Route path="/login" element={<LoginPage />} />
 
         <Route
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["OWNER"]}>
               <AdminLayout />
             </ProtectedRoute>
           }
@@ -47,6 +51,19 @@ function App() {
           <Route path="/admin/bookings" element={<Bookings />} />
           <Route path="/admin/staff" element={<Staff />} />
           <Route path="/admin/settings" element={<Settings />} />
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute allowedRoles={["STAFF"]}>
+              <StaffLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/staff/bookings" element={<StaffBookingPage />} />
+          <Route path="/staff/dashboard" element={<StaffDashboard />} />
+
+          <Route path="/staff/settings" element={<StaffSettings />} />
         </Route>
       </Routes>
     </>

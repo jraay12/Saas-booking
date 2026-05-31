@@ -3,43 +3,29 @@ import Sidebar from "../component/Sidebar";
 
 import {
   LayoutDashboard,
-  BriefcaseBusiness,
-  Users,
   CalendarDays,
   Settings,
 } from "lucide-react";
 
-import AdminHeader from "../component/AdminHeader";
-
 const menu = [
   {
     label: "Dashboard",
-    path: "/admin/dashboard",
+    path: "/staff/dashboard",
     icon: LayoutDashboard,
   },
   {
-    label: "Staff",
-    path: "/admin/staff",
-    icon: Users,
-  },
-  {
-    label: "Services",
-    path: "/admin/services",
-    icon: BriefcaseBusiness,
-  },
-  {
     label: "Bookings",
-    path: "/admin/bookings",
+    path: "/staff/bookings",
     icon: CalendarDays,
   },
   {
     label: "Settings",
-    path: "/admin/settings",
+    path: "/staff/settings",
     icon: Settings,
   },
 ];
 
-export default function AdminLayout() {
+export default function StaffLayout() {
   return (
     <div className="min-h-screen bg-[#f5f5fa] grid grid-cols-1 md:grid-cols-[260px_1fr] ">
       {/* SIDEBAR */}
@@ -49,7 +35,6 @@ export default function AdminLayout() {
 
       {/* RIGHT CONTENT */}
       <div className="flex flex-col min-h-screen ">
-
         {/* PAGE CONTENT */}
         <main className="flex-1 p-4 sm:p-6 ">
           <Outlet />

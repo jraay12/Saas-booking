@@ -5,6 +5,8 @@ import { useNavigate, Link } from "react-router";
 import { loginSchema, type LoginDTO } from "../../schema/auth";
 import { Eye, EyeOff } from "lucide-react";
 import { useLogin } from "../../features/auth/auth.hook";
+import { getUserRole } from "../../lib/decoder";
+import { jwtDecode } from "jwt-decode";
 
 // ── Animated canvas background (light theme) ─────────────────────────────────
 
@@ -139,12 +141,26 @@ const LoginPage = () => {
 
   const loginMutation = useLogin();
 
+  type DecodedToken = {
+    businessId?: string;
+    role: string;
+
+  };
+
   const onSubmit = async (data: LoginDTO) => {
     try {
       loginMutation.mutate(data, {
         onSuccess: (data) => {
           localStorage.setItem("access_token", data.token);
-          navigate("/admin/dashboard");
+          const decode = jwtDecode<DecodedToken>(data.token);
+
+          if (decode.role === "OWNER") {
+            navigate("/admin/dashboard");
+          }
+
+          if (decode.role === "STAFF") {
+            navigate("/staff/dashboard");
+          }
         },
       });
     } catch (err) {

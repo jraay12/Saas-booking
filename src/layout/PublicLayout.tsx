@@ -10,7 +10,7 @@ export default function PublicLayout() {
 
   const { data: business, isLoading } = useGetBusinessDetailsBySlug(slug!);
 
-  if (!business && !isLoading) return <NotFound />;
+  // if (!business && !isLoading) return <NotFound />;
   return (
     <div className="min-h-screen flex flex-col bg-[#f2f5f7]">
       {location.pathname !== "/login" && (
