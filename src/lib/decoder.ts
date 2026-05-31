@@ -3,6 +3,7 @@ import { jwtDecode } from "jwt-decode";
 type DecodedToken = {
   businessId?: string;
   role: string;
+  userId: string;
 };
 
 const token = localStorage.getItem("access_token");
@@ -24,4 +25,8 @@ export const getBusinessId = () => {
 
 export const getUserRole = () => {
   return decoded?.role ?? null;
+};
+
+export const getUserId = () => {
+  return decoded?.userId ?? null;
 };
