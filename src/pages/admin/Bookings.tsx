@@ -3,70 +3,61 @@ import Cards from "../../component/Cards";
 import { StatusBadge } from "../../component/StatusBadge";
 import Table from "../../component/Table";
 import { Phone, X } from "lucide-react";
-
-const data = [
-  {
-    customer: "Alex Johnson",
-    service: "Men's Haircut",
-    staff: "Sarah Jenkins",
-    date: "Oct 24, 2023",
-    time: "10:00 AM - 11:00 AM",
-    status: "Cancelled",
-    payment: "$45.00",
-  },
-  {
-    customer: "Alex Johnson",
-    service: "Men's Haircut",
-    staff: "Sarah Jenkins",
-    date: "Oct 24, 2023",
-    time: "10:00 AM - 11:00 AM",
-    status: "Pending",
-    payment: "$45.00",
-  },
-  {
-    customer: "Alex Johnson",
-    service: "Men's Haircut",
-    staff: "Sarah Jenkins",
-    date: "Oct 24, 2023",
-    time: "10:00 AM - 11:00 AM",
-    status: "Completed",
-    payment: "$45.00",
-  },
-];
+import { useFetchAllBookings } from "../../features/booking/booking.hook";
+import type { Booking } from "../../types/types";
+import { convertTo12Hours } from "../../utils/convertTimeTo12";
 
 const columns = [
-  { header: "Customer", accessor: "customer" },
+  {
+    header: "Customer",
+    accessor: "customer",
+    render: (row: Booking) => (
+      <div>
+        {row.first_name} {row.last_name}
+      </div>
+    ),
+  },
   {
     header: "Service & Staff",
     accessor: "service",
-    render: (row: any) => (
+    render: (row: Booking) => (
       <div>
-        <p className="font-medium">{row.service}</p>
-        <p className="text-xs text-gray-500">with {row.staff}</p>
+        <p className="font-medium">{row.service.service_name}</p>
+        <p className="text-xs text-gray-500">
+          with {row.staff.first_name} {row.staff.last_name}
+        </p>
       </div>
     ),
   },
   {
     header: "Date & Time",
     accessor: "date",
-    render: (row: any) => (
+    render: (row: Booking) => (
       <div>
-        <p>{row.date}</p>
-        <p className="text-xs text-gray-500">{row.time}</p>
+        <p>
+          {new Date(row.booking_date).toLocaleDateString("en-PH", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </p>
+        <p className="text-xs text-gray-500">
+          {convertTo12Hours(row.start_time)}
+        </p>
       </div>
     ),
   },
   {
     header: "Status",
     accessor: "status",
-    render: (row: any) => <StatusBadge status={row.status} />,
+    render: (row: Booking) => <StatusBadge status={row.status} />,
   },
   {
     header: "Payment",
     accessor: "payment",
-    render: (row: any) => (
+    render: (row: Booking) => (
       <div>
-        <p>{row.payment}</p>
+        <p>{row.payment_method}</p>
         <p className="text-xs text-gray-500">unpaid</p>
       </div>
     ),
@@ -75,6 +66,7 @@ const columns = [
 
 const Bookings = () => {
   const [selected, setSelected] = useState<any>(null);
+  const { data: bookings } = useFetchAllBookings();
 
   return (
     <div className="relative overflow-y-auto">
@@ -94,7 +86,7 @@ const Bookings = () => {
       <div className="mt-10">
         <Table
           columns={columns}
-          data={data}
+          data={bookings?.data ?? []}
           onRowClick={(row: any) => setSelected(row)}
         />
       </div>
@@ -106,7 +98,6 @@ const Bookings = () => {
 };
 
 export default Bookings;
-
 
 function SidePanel({
   selected,
@@ -276,4 +267,3 @@ function SidePanel({
     </div>
   );
 }
-

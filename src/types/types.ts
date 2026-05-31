@@ -36,7 +36,7 @@ export type Service = {
   hour: number;
   minute: number;
   image_path: string;
-  is_active: boolean
+  is_active: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -90,3 +90,34 @@ export type CreateBookingRequest = {
 
   start_time: string;
 };
+
+export interface Booking {
+  id: string;
+  business_id: string;
+  service_id: string;
+  staff_id: string;
+  first_name: string;
+  last_name: string;
+  email_address: string;
+  phone_number: string;
+  aditional_notes: string | null;
+  payment_method: "CASH";
+  booking_date: string;
+  service_price: string;
+  start_time: string;
+  created_at: string;
+  status: "PENDING";
+
+  staff: {
+    first_name: string;
+    last_name: string;
+  };
+
+  service: {
+    service_name: string;
+  };
+}
+
+export interface GetBookingsResponse {
+  data: Booking[];
+}
