@@ -18,6 +18,7 @@ import StaffLayout from "./layout/StaffLayout";
 import StaffBookingPage from "./pages/staff/BookingPage";
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffSettings from "./pages/staff/StaffSettings";
+import NotFound from "./pages/public/NotFoundPage";
 function App() {
   return (
     <>
@@ -68,6 +69,7 @@ function App() {
 
           <Route path="/staff/settings" element={<StaffSettings />} />
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );
