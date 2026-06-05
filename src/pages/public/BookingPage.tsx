@@ -135,9 +135,7 @@ export default function BookingPage() {
             {business?.address}
           </p>
 
-          <div className="mt-4 sm:mt-6 w-full sm:w-auto">
-            <Button name="Book Appointment" className="w-full sm:w-50" />
-          </div>
+
         </div>
       </div>
 
