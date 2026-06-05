@@ -107,7 +107,7 @@ const Service = () => {
       {/* HEADER */}
       <div className="flex justify-between items-center mb-10">
         <div>
-          <h1 className="text-2xl font-semibold">Service Management</h1>
+          <h1 className="text-2xl font-medium tracking-tight">Service Management</h1>
           <p className="text-sm text-black/50 mt-2 max-w-3/4">
             Configure and manage the service offerings available for booking,
             organize them by category, and assign staff members.

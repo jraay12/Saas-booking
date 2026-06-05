@@ -22,6 +22,15 @@ function App() {
   return (
     <>
       <Routes>
+        <Route element={<PublicLayout />}>
+          <Route path="/service/:slug" element={<BookingPage />} />
+          <Route path="/staff/:slug" element={<StaffPage />} />
+          <Route
+            path="/booking/:slug/confirmation"
+            element={<BookingConfirmation />}
+          />
+        </Route>
+
         <Route
           element={
             <PublicRoute>
@@ -29,12 +38,6 @@ function App() {
             </PublicRoute>
           }
         >
-          <Route path="/service/:slug" element={<BookingPage />} />
-          <Route path="/staff/:slug" element={<StaffPage />} />
-          <Route
-            path="/booking/:slug/confirmation"
-            element={<BookingConfirmation />}
-          />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
         </Route>

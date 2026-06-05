@@ -131,7 +131,7 @@ const Staff = () => {
       {/* HEADER */}
       <div className="flex justify-between items-start mb-10">
         <div>
-          <h1 className="text-2xl font-medium text-black">
+          <h1 className="text-2xl font-medium text-black tracking-tight">
             Staff management
           </h1>
           <p className="text-sm text-black/50 mt-1">

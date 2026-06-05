@@ -282,7 +282,7 @@ function SidePanel({
       />
 
       {/* Panel */}
-      <div className="absolute right-0 top-0 h-[100dvh] w-[340px] bg-white border-l border-zinc-200/80 shadow-2xl flex flex-col translate-x-0 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
+      <div className="absolute right-0 top-0 h-[100dvh] w-[340px] bg-white border-l  border-zinc-200/80 shadow-2xl flex flex-col translate-x-0 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 shrink-0">
           <div>
@@ -523,10 +523,10 @@ const Bookings = () => {
   });
 
   return (
-    <div className="relative overflow-y-auto">
+    <div className="relative overflow-y-auto p-6">
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
+        <h1 className="text-2xl font-medium text-black tracking-tight">
           Bookings
         </h1>
         <p className="text-sm text-zinc-400 mt-1">
