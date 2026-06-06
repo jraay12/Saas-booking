@@ -179,3 +179,155 @@ export const timeSlots = [
   "01:30 PM",
   "02:00 PM",
 ];
+
+
+// ─── Today's Schedule ────────────────────────────────────────────────────────
+export const TODAY_SCHEDULE = [
+  {
+    id: "1",
+    time: "09:00",
+    duration: "60 min",
+    client: "Sofia Reyes",
+    service: "Swedish Relaxation",
+    staff: "M. Santos",
+    status: "CONFIRMED",
+  },
+  {
+    id: "2",
+    time: "10:30",
+    duration: "90 min",
+    client: "Marco Tan",
+    service: "Deep Tissue Massage",
+    staff: "J. dela Cruz",
+    status: "CONFIRMED",
+  },
+  {
+    id: "3",
+    time: "13:00",
+    duration: "60 min",
+    client: "Camille Lim",
+    service: "Foot Reflexology",
+    staff: "A. Bautista",
+    status: "PENDING",
+  },
+  {
+    id: "4",
+    time: "14:30",
+    duration: "45 min",
+    client: "Diego Villanueva",
+    service: "Aromatherapy",
+    staff: "M. Santos",
+    status: "CONFIRMED",
+  },
+  {
+    id: "5",
+    time: "16:00",
+    duration: "60 min",
+    client: "Isabel Cruz",
+    service: "Sports Massage",
+    staff: "J. dela Cruz",
+    status: "PENDING",
+  },
+];
+
+// ─── Recent Bookings ──────────────────────────────────────────────────────────
+export const RECENT_BOOKINGS = [
+  {
+    id: "bk-001",
+    first_name: "Alex",
+    last_name: "Johnson",
+    service: { service_name: "Hot Stone Therapy" },
+    staff: { first_name: "Ana", last_name: "Bautista" },
+    booking_date: "2025-06-14",
+    start_time: "10:00",
+    status: "COMPLETED",
+    service_price: "1500",
+  },
+  {
+    id: "bk-002",
+    first_name: "Sofia",
+    last_name: "Reyes",
+    service: { service_name: "Swedish Relaxation" },
+    staff: { first_name: "Maria", last_name: "Santos" },
+    booking_date: "2025-06-13",
+    start_time: "13:30",
+    status: "CONFIRMED",
+    service_price: "900",
+  },
+  {
+    id: "bk-003",
+    first_name: "Marco",
+    last_name: "Tan",
+    service: { service_name: "Deep Tissue Massage" },
+    staff: { first_name: "Juan", last_name: "dela Cruz" },
+    booking_date: "2025-06-13",
+    start_time: "09:00",
+    status: "PENDING",
+    service_price: "1200",
+  },
+  {
+    id: "bk-004",
+    first_name: "Camille",
+    last_name: "Lim",
+    service: { service_name: "Foot Reflexology" },
+    staff: { first_name: "Ana", last_name: "Bautista" },
+    booking_date: "2025-06-12",
+    start_time: "15:00",
+    status: "CANCELLED",
+    service_price: "750",
+  },
+  {
+    id: "bk-005",
+    first_name: "Diego",
+    last_name: "Villanueva",
+    service: { service_name: "Aromatherapy Massage" },
+    staff: { first_name: "Maria", last_name: "Santos" },
+    booking_date: "2025-06-12",
+    start_time: "11:00",
+    status: "COMPLETED",
+    service_price: "1100",
+  },
+];
+
+// ─── Staff Data ───────────────────────────────────────────────────────────────
+export const STAFF_DATA = [
+  { name: "Maria Santos", sessions: 2, max: 4, color: "#534AB7" },
+  { name: "Juan dela Cruz", sessions: 2, max: 4, color: "#185FA5" },
+  { name: "Ana Bautista", sessions: 1, max: 4, color: "#1D9E75" },
+];
+
+// ─── Top Services ─────────────────────────────────────────────────────────────
+export const TOP_SERVICES = [
+  { name: "Swedish Relaxation", revenue: 9800, color: "#534AB7" },
+  { name: "Deep Tissue Massage", revenue: 8400, color: "#185FA5" },
+  { name: "Hot Stone Therapy", revenue: 7200, color: "#1D9E75" },
+  { name: "Aromatherapy", revenue: 5100, color: "#BA7517" },
+  { name: "Foot Reflexology", revenue: 4200, color: "#E24B4A" },
+];
+
+// ─── Revenue Data ─────────────────────────────────────────────────────────────
+export const REVENUE_DATA = {
+  "7d": {
+    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    revenue: [8200, 11500, 9800, 13200, 10400, 15600, 12800],
+    target: [10000, 10000, 10000, 10000, 10000, 10000, 10000],
+  },
+  "30d": {
+    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+    revenue: [42000, 56000, 49000, 61000],
+    target: [50000, 50000, 50000, 50000],
+  },
+};
+
+// ─── Hourly Data ──────────────────────────────────────────────────────────────
+export const HOURLY_DATA = {
+  labels: ["9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+  data: [1, 1, 0, 0, 1, 1, 0, 1, 0],
+};
+
+// ─── Status Donut ─────────────────────────────────────────────────────────────
+export const STATUS_DONUT = {
+  labels: ["Confirmed", "Completed", "Pending", "Cancelled"],
+  data: [45, 25, 20, 10],
+  colors: ["#185FA5", "#1D9E75", "#EF9F27", "#E24B4A"],
+};
