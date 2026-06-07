@@ -45,7 +45,7 @@ function App() {
 
         <Route
           element={
-            <ProtectedRoute allowedRoles={["OWNER"]}>
+            <ProtectedRoute>
               <AdminLayout />
             </ProtectedRoute>
           }
@@ -59,7 +59,7 @@ function App() {
 
         <Route
           element={
-            <ProtectedRoute allowedRoles={["STAFF"]}>
+            <ProtectedRoute>
               <StaffLayout />
             </ProtectedRoute>
           }

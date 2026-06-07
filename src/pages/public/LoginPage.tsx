@@ -141,26 +141,12 @@ const LoginPage = () => {
 
   const loginMutation = useLogin();
 
-  type DecodedToken = {
-    businessId?: string;
-    role: string;
-
-  };
-
   const onSubmit = async (data: LoginDTO) => {
     try {
       loginMutation.mutate(data, {
         onSuccess: (data) => {
           localStorage.setItem("access_token", data.token);
-          const decode = jwtDecode<DecodedToken>(data.token);
-
-          if (decode.role === "OWNER") {
-            navigate("/admin/dashboard");
-          }
-
-          if (decode.role === "STAFF") {
-            navigate("/staff/dashboard");
-          }
+          navigate("/admin/dashboard");
         },
       });
     } catch (err) {
