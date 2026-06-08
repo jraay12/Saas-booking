@@ -121,3 +121,22 @@ export interface Booking {
 export interface GetBookingsResponse {
   data: Booking[];
 }
+
+
+export interface Membership {
+  role: string
+}
+
+export interface UserProfile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  avatar: string;
+  phone: string | null;
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
+  updated_at: string;
+  memberships: Membership[];
+}

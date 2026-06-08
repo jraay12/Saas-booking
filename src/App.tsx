@@ -19,58 +19,61 @@ import StaffBookingPage from "./pages/staff/BookingPage";
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffSettings from "./pages/staff/StaffSettings";
 import NotFound from "./pages/public/NotFoundPage";
+import { AuthProvider } from "./provider/AuthProvider";
 function App() {
   return (
     <>
-      <Routes>
-        <Route element={<PublicLayout />}>
-          <Route path="/service/:slug" element={<BookingPage />} />
-          <Route path="/staff/:slug" element={<StaffPage />} />
+      <AuthProvider>
+        <Routes>
+          <Route element={<PublicLayout />}>
+            <Route path="/service/:slug" element={<BookingPage />} />
+            <Route path="/staff/:slug" element={<StaffPage />} />
+            <Route
+              path="/booking/:slug/confirmation"
+              element={<BookingConfirmation />}
+            />
+          </Route>
+
           <Route
-            path="/booking/:slug/confirmation"
-            element={<BookingConfirmation />}
-          />
-        </Route>
+            element={
+              <PublicRoute>
+                <PublicLayout />
+              </PublicRoute>
+            }
+          >
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<LoginPage />} />
+          </Route>
 
-        <Route
-          element={
-            <PublicRoute>
-              <PublicLayout />
-            </PublicRoute>
-          }
-        >
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/login" element={<LoginPage />} />
-        </Route>
+          <Route
+            element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/admin/services" element={<Service />} />
+            <Route path="/admin/bookings" element={<Bookings />} />
+            <Route path="/admin/staff" element={<Staff />} />
+            <Route path="/admin/settings" element={<Settings />} />
+          </Route>
 
-        <Route
-          element={
-            <ProtectedRoute>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/admin/services" element={<Service />} />
-          <Route path="/admin/bookings" element={<Bookings />} />
-          <Route path="/admin/staff" element={<Staff />} />
-          <Route path="/admin/settings" element={<Settings />} />
-        </Route>
+          <Route
+            element={
+              <ProtectedRoute>
+                <StaffLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/staff/bookings" element={<StaffBookingPage />} />
+            <Route path="/staff/dashboard" element={<StaffDashboard />} />
 
-        <Route
-          element={
-            <ProtectedRoute>
-              <StaffLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/staff/bookings" element={<StaffBookingPage />} />
-          <Route path="/staff/dashboard" element={<StaffDashboard />} />
-
-          <Route path="/staff/settings" element={<StaffSettings />} />
-        </Route>
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+            <Route path="/staff/settings" element={<StaffSettings />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
     </>
   );
 }
