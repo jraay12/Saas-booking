@@ -20,6 +20,7 @@ import StaffSettings from "./pages/staff/StaffSettings";
 import NotFound from "./pages/public/NotFoundPage";
 import { AuthProvider } from "./provider/AuthProvider";
 import { PublicRoute } from "./router/PublicRoutes";
+import CreateBusinessPage from "./pages/admin/CreateBusinessPage";
 function App() {
   return (
     <>
@@ -32,6 +33,12 @@ function App() {
               path="/booking/:slug/confirmation"
               element={<BookingConfirmation />}
             />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={["OWNER"]} />}></Route>
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/create/business" element={<CreateBusinessPage />} />
           </Route>
 
           <Route element={<PublicRoute />}>

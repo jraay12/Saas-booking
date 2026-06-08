@@ -150,14 +150,27 @@ const LoginPage = () => {
       loginMutation.mutate(data, {
         onSuccess: async (data) => {
           localStorage.setItem("access_token", data.token);
-          const result = await refetch();
 
+          const result = await refetch();
           const profile = result.data;
 
-          if (profile?.memberships[0].role === "OWNER") {
+          const memberships = profile?.memberships || [];
+
+          if (memberships.length === 0) {
+            navigate("/create/business");
+            return;
+          }
+
+          const role = memberships[0]?.role;
+
+          if (role === "OWNER") {
             navigate("/admin/dashboard");
-          } else {
+            return;
+          }
+
+          if (role === "STAFF") {
             navigate("/staff/dashboard");
+            return;
           }
         },
       });

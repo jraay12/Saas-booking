@@ -4,7 +4,7 @@ import { useAuth } from "../provider/AuthProvider";
 export default function ProtectedRoute({
   allowedRoles,
 }: {
-  allowedRoles: string[];
+  allowedRoles?: string[];
 }) {
   const { user, isLoading } = useAuth();
 
@@ -16,7 +16,13 @@ export default function ProtectedRoute({
     return <Navigate to="/login" replace />;
   }
 
-  if (!allowedRoles.includes(user.memberships[0].role)) {
+  const role = user.memberships?.[0]?.role;
+
+  if (!role) {
+    return <Navigate to="/create/business" replace />;
+  }
+
+  if (!allowedRoles?.includes(role)) {
     return <Navigate to="/unauthorized" replace />;
   }
 
