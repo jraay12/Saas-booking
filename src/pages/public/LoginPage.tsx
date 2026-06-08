@@ -7,6 +7,9 @@ import { Eye, EyeOff } from "lucide-react";
 import { useLogin } from "../../features/auth/auth.hook";
 import { getUserRole } from "../../lib/decoder";
 import { jwtDecode } from "jwt-decode";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../../lib/queryKey";
+import { useAuth } from "../../provider/AuthProvider";
 
 // ── Animated canvas background (light theme) ─────────────────────────────────
 
@@ -125,7 +128,8 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
   const navigate = useNavigate();
-
+  const queryClient = useQueryClient();
+  const { refetch } = useAuth();
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 50);
     return () => clearTimeout(t);
@@ -144,9 +148,17 @@ const LoginPage = () => {
   const onSubmit = async (data: LoginDTO) => {
     try {
       loginMutation.mutate(data, {
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
           localStorage.setItem("access_token", data.token);
-          navigate("/admin/dashboard");
+          const result = await refetch();
+
+          const profile = result.data;
+
+          if (profile?.memberships[0].role === "OWNER") {
+            navigate("/admin/dashboard");
+          } else {
+            navigate("/staff/dashboard");
+          }
         },
       });
     } catch (err) {
