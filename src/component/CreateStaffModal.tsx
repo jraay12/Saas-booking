@@ -28,12 +28,12 @@ const roles = [
     description:
       "Can manage own schedule, view assigned appointments, and update basic profile info.",
   },
-  {
-    id: "OWNER",
-    title: "OWNER",
-    description:
-      "Full access to settings, billing, reporting, and managing all staff accounts.",
-  },
+  // {
+  //   id: "OWNER",
+  //   title: "OWNER",
+  //   description:
+  //     "Full access to settings, billing, reporting, and managing all staff accounts.",
+  // },
 ];
 
 const CreateStaffModal = ({ onClose, open }: Props) => {
