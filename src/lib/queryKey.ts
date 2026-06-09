@@ -31,6 +31,6 @@ export const queryKeys = {
 
   availableSlots : (business_id: string, service_id: string, staff_id: string, date: string) => ['available-slots', business_id, service_id, staff_id, date],
 
-  profile: (id: string) => ["profile", id],
+  profile: () => ["profile"],
 
 };
