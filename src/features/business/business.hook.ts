@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getBusinessId } from "../../lib/decoder";
 import {
+  createBusiness,
   createBusinessHours,
   getBusinessDetailsBySlug,
   getBusinessHours,
@@ -41,5 +42,18 @@ export const useGetBusinessDetailsBySlug = (slug: string) => {
     queryFn: () => getBusinessDetailsBySlug(slug),
     queryKey: queryKeys.businesses(businessId!),
     enabled: !!slug,
+  });
+};
+
+export const useCreateBusiness = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createBusiness,
+    onSuccess: (data) => {
+      console.log(data)
+      // queryClient.invalidateQueries({
+      //   queryKey: queryKeys.businesses(data),
+      // });
+    },
   });
 };

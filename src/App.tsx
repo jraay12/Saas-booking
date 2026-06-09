@@ -21,6 +21,7 @@ import NotFound from "./pages/public/NotFoundPage";
 import { AuthProvider } from "./provider/AuthProvider";
 import { PublicRoute } from "./router/PublicRoutes";
 import CreateBusinessPage from "./pages/admin/CreateBusinessPage";
+import { AuthRoute } from "./router/AuthRoute";
 function App() {
   return (
     <>
@@ -35,9 +36,8 @@ function App() {
             />
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={["OWNER"]} />}></Route>
 
-          <Route element={<ProtectedRoute />}>
+          <Route element={<AuthRoute />}>
             <Route path="/create/business" element={<CreateBusinessPage />} />
           </Route>
 
