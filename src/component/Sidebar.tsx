@@ -134,7 +134,11 @@ const Sidebar = ({ data }: Props) => {
           className="flex items-center gap-2.5 px-3.5 py-3 cursor-pointer hover:bg-zinc-50 transition-colors"
         >
           <img
-            src={`${import.meta.env.VITE_AVATAR_PREFIX}${profile?.avatar}`}
+            src={
+              profile?.avatar?.startsWith("https")
+                ? profile.avatar
+                : `${import.meta.env.VITE_AVATAR_PREFIX}${profile?.avatar}`
+            }
             className="w-9 h-9 rounded-full ring-1 ring-zinc-200 shrink-0 object-cover"
           />
           <div className="flex flex-col min-w-0 flex-1">
