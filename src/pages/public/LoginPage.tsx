@@ -5,10 +5,7 @@ import { useNavigate, Link } from "react-router";
 import { loginSchema, type LoginDTO } from "../../schema/auth";
 import { Eye, EyeOff } from "lucide-react";
 import { useLogin } from "../../features/auth/auth.hook";
-import { getUserRole } from "../../lib/decoder";
-import { jwtDecode } from "jwt-decode";
 import { useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "../../lib/queryKey";
 import { useAuth } from "../../provider/AuthProvider";
 
 // ── Animated canvas background (light theme) ─────────────────────────────────
@@ -128,7 +125,6 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { refetch } = useAuth();
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 50);
