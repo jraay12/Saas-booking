@@ -410,7 +410,7 @@ const LoginPage = () => {
             </button>
 
             {/* Sign up link */}
-            <p className="text-center text-sm text-gray-400">
+            <p className="text-center text-sm text-gray-400 mt-10">
               Don't have an account?{" "}
               <Link
                 to="/register"
