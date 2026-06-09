@@ -1,6 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 
-type DecodedToken = {
+export type DecodedToken = {
   businessId?: string;
   role: string;
   userId: string;

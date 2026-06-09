@@ -1,8 +1,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import type { UserProfile } from "../types/types";
 import { useFetchMyProfile } from "../features/user/user.hooks";
-
+import { queryClient } from "./QueryProvider";
 interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
@@ -17,7 +16,6 @@ interface ThemeProviderProps {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: ThemeProviderProps ) => {
-  const queryClient = useQueryClient();
   const { data, isLoading, refetch } = useFetchMyProfile();
   const [user, setUser] = useState<UserProfile | null>(null);
 
