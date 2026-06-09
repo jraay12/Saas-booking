@@ -61,7 +61,7 @@ const Settings = () => {
 
   return (
     <div className="p-4 sm:p-6 overflow-y-auto">
-      <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
+      <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Settings</h1>
 
       {/* Tabs */}
       <div className="flex gap-4 sm:gap-6 mt-4 border-b border-zinc-200 ">

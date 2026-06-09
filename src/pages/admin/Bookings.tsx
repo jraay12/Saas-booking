@@ -526,7 +526,7 @@ const Bookings = () => {
     <div className="relative overflow-y-auto p-6">
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-medium text-black tracking-tight">
+        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
           Bookings
         </h1>
         <p className="text-sm text-zinc-400 mt-1">
