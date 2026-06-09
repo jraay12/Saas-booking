@@ -125,6 +125,7 @@ export interface GetBookingsResponse {
 
 export interface Membership {
   role: string
+  business_id: string
 }
 
 export interface UserProfile {
