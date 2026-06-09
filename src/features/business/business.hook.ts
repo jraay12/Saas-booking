@@ -46,7 +46,6 @@ export const useGetBusinessDetailsBySlug = (slug: string) => {
 };
 
 export const useCreateBusiness = () => {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createBusiness,
     onSuccess: (data) => {

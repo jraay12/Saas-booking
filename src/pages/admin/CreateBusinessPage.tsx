@@ -289,7 +289,6 @@ const CreateBusinessPage = () => {
 
     createBusiness(formData, {
       onSuccess: async (data) => {
-        console.log(data)
         const result = await refetch();
         const profile = result.data;
 

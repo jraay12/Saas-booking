@@ -15,7 +15,6 @@ api.interceptors.request.use((config) => {
   }
 
   const user = queryClient.getQueryData<UserProfile>(queryKeys.profile());
-  console.log(user)
   const businessId = user?.memberships?.[0]?.business_id;
   if (businessId) {
     config.headers["x-business-id"] = businessId;

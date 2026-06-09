@@ -84,10 +84,6 @@ const Service = () => {
       formData.append("image", updated.cover_image);
     }
 
-    for (const pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
-
     updateServiceMutation.mutate(
       {
         data: formData,

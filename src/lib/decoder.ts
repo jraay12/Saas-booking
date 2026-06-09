@@ -13,7 +13,6 @@ let decoded: DecodedToken | null = null;
 if (token) {
   try {
     decoded = jwtDecode<DecodedToken>(token);
-    console.log(decoded);
   } catch (error) {
     console.error("Invalid token format", error);
   }
