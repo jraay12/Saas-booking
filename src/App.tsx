@@ -22,6 +22,7 @@ import { AuthProvider } from "./provider/AuthProvider";
 import { PublicRoute } from "./router/PublicRoutes";
 import CreateBusinessPage from "./pages/admin/CreateBusinessPage";
 import { AuthRoute } from "./router/AuthRoute";
+import OAuthCallbackPage from "./pages/public/OauthCallbackPage";
 function App() {
   return (
     <>
@@ -64,6 +65,7 @@ function App() {
               <Route path="/staff/settings" element={<StaffSettings />} />
             </Route>
           </Route>
+          <Route path="/auth/callback" element={<OAuthCallbackPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
