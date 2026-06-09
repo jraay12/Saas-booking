@@ -131,6 +131,7 @@ const RegisterPage = () => {
   };
 
   const navigate = useNavigate();
+  const { refetch } = useAuth();
   const { mutate: createAccount, isPending, isError, error } = useRegister();
   const {
     register,
@@ -185,7 +186,11 @@ const RegisterPage = () => {
     if (avatarFile) formData.append("avatar", avatarFile);
 
     createAccount(formData, {
-      onSuccess: () => navigate("/create/business"),
+      onSuccess: async (data) => {
+        localStorage.setItem("access_token", data.token);
+        await refetch();
+        navigate("/create/business");
+      },
     });
   };
 
