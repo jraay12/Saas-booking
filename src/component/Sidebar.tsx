@@ -1,14 +1,7 @@
-import {
-  Calendar,
-  User,
-  Settings,
-  LogOut,
-  ChevronUp,
-  Star,
-} from "lucide-react";
+import { Calendar, User, LogOut, ChevronUp } from "lucide-react";
 import { NavLink, useNavigate } from "react-router";
-import { useFetchMyProfile } from "../features/user/user.hooks";
 import { useState, useRef, useEffect } from "react";
+import { useAuth } from "../provider/AuthProvider";
 
 type Props = {
   data: any[];
@@ -18,7 +11,7 @@ const Sidebar = ({ data }: Props) => {
   // React Router
   const navigate = useNavigate();
 
-  const { data: profile } = useFetchMyProfile();
+  const { user: profile, logout } = useAuth();
 
   const [open, setOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -40,7 +33,7 @@ const Sidebar = ({ data }: Props) => {
 
   // Functions
   const handleLogout = () => {
-    localStorage.clear();
+    logout();
     navigate("/login");
   };
 
@@ -112,7 +105,10 @@ const Sidebar = ({ data }: Props) => {
             <div className="h-px bg-zinc-100 mx-3" />
 
             <div className="p-1.5">
-              <button onClick={() => handleLogout()} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-left hover:bg-red-50 transition-colors group cursor-pointer">
+              <button
+                onClick={() => handleLogout()}
+                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-left hover:bg-red-50 transition-colors group cursor-pointer"
+              >
                 <LogOut
                   size={15}
                   className="text-red-300 group-hover:text-red-500 transition-colors"
