@@ -5,6 +5,7 @@ import {
   useGetBusinessHours,
 } from "../../features/business/business.hook";
 import type { GetBusinessHoursResponse } from "../../types/types";
+import { toast, Toaster } from "sonner";
 const tabs = [
   { label: "Business Hours", value: "hours" },
   { label: "Booking Site", value: "site" },
@@ -56,12 +57,29 @@ const Settings = () => {
   };
 
   const handleSubmit = (data: any) => {
-    createBusinessHoursMutation.mutate(data);
+    createBusinessHoursMutation.mutate(data, {
+      onSuccess: () => {
+        toast.success("Business Hours Created", {
+          description: "Your business hours have been saved successfully.",
+          richColors: true,
+          position: "top-right",
+        });
+      },
+      onError: (error: any) => {
+        toast.error("Failed to Save", {
+          description:
+            error?.response?.data?.message ?? "Unable to save business hours.",
+          richColors: true,
+          position: "top-right",
+        });
+      },
+    });
   };
-
   return (
     <div className="p-4 sm:p-6 overflow-y-auto">
-      <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Settings</h1>
+      <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
+        Settings
+      </h1>
 
       {/* Tabs */}
       <div className="flex gap-4 sm:gap-6 mt-4 border-b border-zinc-200 ">
@@ -108,6 +126,7 @@ const Settings = () => {
           copied={copied}
         />
       )}
+      <Toaster />
     </div>
   );
 };
