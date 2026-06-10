@@ -19,6 +19,8 @@ import {
 import type { Booking } from "../../types/types";
 import { convertTo12Hours } from "../../utils/convertTimeTo12";
 import { useConfirmBooking } from "../../features/booking/booking.hook";
+import { Toaster, toast } from "sonner";
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Variant = "total" | "pending" | "confirmed" | "completed" | "canceled";
@@ -205,9 +207,21 @@ function SidePanel({
               ? {
                   ...prev,
                   status: "CONFIRMED",
-                }
+                } 
               : null,
           );
+          toast.success("Booking Confirmed", {
+            description: "The customer has been notified via email.",
+            position: "top-left",
+            richColors: true
+          });
+        },
+        onError: () => {
+          toast.error("Oops! Something went wrong", {
+            description: "Please try again in a moment.",
+            position: "top-right",
+            richColors: true,
+          });
         },
       },
     );
@@ -226,6 +240,21 @@ function SidePanel({
                 }
               : null,
           );
+
+          toast.success("Booking Cancelled", {
+            description: "The booking has been cancelled successfully.",
+            position: "top-left",
+            richColors: true,
+          });
+        },
+        onError: (error: any) => {
+          toast.error("Cancellation Failed", {
+            description:
+              error?.response?.data?.message ||
+              "Unable to cancel the booking. Please try again.",
+            position: "top-left",
+            richColors: true,
+          });
         },
       },
     );
@@ -707,6 +736,7 @@ const Bookings = () => {
           setSelected={setSelected}
         />
       )}
+      <Toaster />
     </div>
   );
 };
