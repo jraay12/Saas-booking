@@ -21,6 +21,7 @@ type StaffUser = {
   email: string;
   first_name: string;
   last_name: string;
+  phone: string
 };
 
 type StaffMember = {
@@ -49,6 +50,7 @@ const roles = [
 ];
 
 const CreateStaffModal = ({ onClose, open, staff }: Props) => {
+  console.log(staff)
   const [selected, setSelected] = useState("STAFF");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -147,6 +149,7 @@ const CreateStaffModal = ({ onClose, open, staff }: Props) => {
         last_name: staff.user.last_name,
         business_id: staff.business_id,
         email: staff.user.email,
+        phone: staff.user.phone
       });
 
       setSelected(staff.role);

@@ -22,6 +22,7 @@ type StaffUser = {
   email: string;
   first_name: string;
   last_name: string;
+  phone: string
 };
 
 type StaffMember = {
