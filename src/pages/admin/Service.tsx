@@ -26,6 +26,7 @@ import type {
 } from "../../types/types";
 import { useAssignStaff } from "../../features/service/service.hook";
 import { getInitials } from "../../utils/getInitial";
+import { toast, Toaster } from "sonner";
 /* =========================
    MAIN PAGE
 ========================= */
@@ -93,6 +94,21 @@ const Service = () => {
         onSuccess: () => {
           setEditModalOpen(false);
           setSelectedService(null);
+
+          toast.success("Service Saved", {
+            description: "The service information has been saved successfully.",
+            richColors: true,
+            position: "top-right",
+          });
+        },
+        onError: (error: any) => {
+          toast.error("Failed to Save Service", {
+            description:
+              error?.response?.data?.message ??
+              "Unable to save the service information.",
+            richColors: true,
+            position: "top-right",
+          });
         },
       },
     );
@@ -103,7 +119,9 @@ const Service = () => {
       {/* HEADER */}
       <div className="flex justify-between items-center mb-10">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Service Management</h1>
+          <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
+            Service Management
+          </h1>
           <p className="text-sm text-black/50 mt-2 max-w-3/4">
             Configure and manage the service offerings available for booking,
             organize them by category, and assign staff members.
@@ -179,6 +197,7 @@ const Service = () => {
           }}
         />
       )}
+      <Toaster />
     </div>
   );
 };
@@ -745,10 +764,28 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
     const toAssign = staffList.filter((s) => selected.has(s.id));
     const arrayIds = toAssign.map((item) => item.user_id);
     assignStaffMutation.mutate(
-      { staff_ids: arrayIds, service_id: service.id },
+      {
+        staff_ids: arrayIds,
+        service_id: service.id,
+      },
       {
         onSuccess: () => {
           setSelected(new Set());
+
+          toast.success("Staff Assignment Saved", {
+            description: "Staff members have been assigned successfully.",
+            richColors: true,
+            position: "top-left",
+          });
+        },
+        onError: (error: any) => {
+          toast.error("Failed to Assign Staff", {
+            description:
+              error?.response?.data?.message ??
+              "Unable to assign staff members.",
+            richColors: true,
+            position: "top-left",
+          });
         },
       },
     );
@@ -766,10 +803,31 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
   const unassignedStaff = staffList;
 
   const handleRemoveStaff = (staffId: string) => {
-    removeAssignedStaffMutation.mutate({
-      service_id: service.id,
-      staff_id: staffId,
-    });
+    removeAssignedStaffMutation.mutate(
+      {
+        service_id: service.id,
+        staff_id: staffId,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Staff Removed", {
+            description:
+              "The staff member has been unassigned from this service.",
+            richColors: true,
+            position: "top-left",
+          });
+        },
+        onError: (error: any) => {
+          toast.error("Failed to Remove Staff", {
+            description:
+              error?.response?.data?.message ??
+              "Unable to remove the staff assignment.",
+            richColors: true,
+            position: "top-left",
+          });
+        },
+      },
+    );
   };
   return (
     <>
@@ -1109,5 +1167,3 @@ function ManageStaffPanel({ service, onClose }: ManageStaffPanelProps) {
     </>
   );
 }
-
-
