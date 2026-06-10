@@ -110,7 +110,7 @@ const Staff = () => {
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
 
   const { data: response } = useGetStaffMembers();
-  const businessId = getBusinessId()
+  const businessId = getBusinessId();
 
   const staffs: StaffMember[] = response ?? [];
 
@@ -126,6 +126,10 @@ const Staff = () => {
         )
       : "—";
 
+  const handleEdit = (data: any) => {
+    setSelectedStaff(data);
+    setCreateStaffModal(true);
+  };
   return (
     <div className="p-6">
       {/* HEADER */}
@@ -204,6 +208,7 @@ const Staff = () => {
                 setSelectedStaff(s);
                 setDeleteModal(true);
               }}
+              onEdit={() => handleEdit(s)}
             />
           ))}
         </div>
@@ -221,8 +226,12 @@ const Staff = () => {
       )}
 
       <CreateStaffModal
-        onClose={() => setCreateStaffModal(false)}
+        onClose={() => {
+          setSelectedStaff(null)
+          setCreateStaffModal(false)
+        }}
         open={createStaffModal}
+        staff={selectedStaff ?? undefined}
       />
       <DeleteModal
         onClose={() => setDeleteModal(false)}
@@ -268,9 +277,10 @@ type StaffCardProps = {
   staff: StaffMember;
   index: number;
   onDelete: () => void;
+  onEdit: () => void;
 };
 
-function StaffCard({ staff, index, onDelete }: StaffCardProps) {
+function StaffCard({ staff, index, onDelete, onEdit }: StaffCardProps) {
   const { user } = staff;
 
   return (
@@ -298,6 +308,7 @@ function StaffCard({ staff, index, onDelete }: StaffCardProps) {
           icon={Edit}
           variant="edit"
           className="flex-1 h-8 text-xs"
+          onClick={onEdit}
         />
         <Button
           name="Delete"

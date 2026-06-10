@@ -141,3 +141,4 @@ export interface UserProfile {
   updated_at: string;
   memberships: Membership[];
 }
+

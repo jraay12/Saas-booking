@@ -1,15 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Camera, Eye, EyeOff, X } from "lucide-react";
 import Input from "./Input";
-import Search from "./Search";
-import { services } from "../data/mockdata";
 import { useCreateStaff } from "../features/staff/staff.hook";
-
-type Props = {
-  onClose?: () => void;
-  open: boolean;
-};
+import { useUpdateUser } from "../features/user/user.hooks";
 
 type CreateStaffDTO = {
   first_name: string;
@@ -21,6 +15,30 @@ type CreateStaffDTO = {
   business_id?: string;
 };
 
+type StaffUser = {
+  id: string;
+  avatar: string | null;
+  email: string;
+  first_name: string;
+  last_name: string;
+};
+
+type StaffMember = {
+  id: string;
+  user_id: string;
+  business_id: string;
+  role: string;
+  created_at: string;
+  updated_at: string;
+  user: StaffUser;
+};
+
+type Props = {
+  onClose?: () => void;
+  open: boolean;
+  staff?: StaffMember;
+};
+
 const roles = [
   {
     id: "STAFF",
@@ -28,23 +46,20 @@ const roles = [
     description:
       "Can manage own schedule, view assigned appointments, and update basic profile info.",
   },
-  // {
-  //   id: "OWNER",
-  //   title: "OWNER",
-  //   description:
-  //     "Full access to settings, billing, reporting, and managing all staff accounts.",
-  // },
 ];
 
-const CreateStaffModal = ({ onClose, open }: Props) => {
+const CreateStaffModal = ({ onClose, open, staff }: Props) => {
   const [selected, setSelected] = useState("STAFF");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [requirePasswordChange, setRequirePasswordChange] = useState(false);
-
+  const isEditMode = !!staff;
   const createStaffMutation = useCreateStaff();
-
+  const updateStaffMutation = useUpdateUser();
+  const isSubmitting = isEditMode
+    ? updateStaffMutation.isPending
+    : createStaffMutation.isPending;
   const {
     register,
     handleSubmit,
@@ -78,7 +93,6 @@ const CreateStaffModal = ({ onClose, open }: Props) => {
       formData.append("first_name", data.first_name);
       formData.append("last_name", data.last_name);
       formData.append("email", data.email);
-      formData.append("password", data.password);
 
       if (data.phone) {
         formData.append("phone", data.phone);
@@ -92,26 +106,64 @@ const CreateStaffModal = ({ onClose, open }: Props) => {
         formData.append("avatar", data.avatar[0]);
       }
 
+      if (isEditMode) {
+        updateStaffMutation.mutate(
+          {
+            id: staff.user.id, // or staff.id depending on your API
+            data: formData,
+          },
+          {
+            onSuccess: () => {
+              reset();
+              setImagePreview(null);
+              onClose?.();
+            },
+          },
+        );
+
+        return;
+      }
+
+      formData.append("password", data.password);
       formData.append("role", selected);
-      formData.append(
-        "require_password_change",
-        String(requirePasswordChange),
-      );
+      formData.append("require_password_change", String(requirePasswordChange));
 
       createStaffMutation.mutate(formData, {
         onSuccess: () => {
           reset();
           setImagePreview(null);
-
-          if (onClose) {
-            onClose();
-          }
+          onClose?.();
         },
       });
     } catch (err) {
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    if (staff) {
+      reset({
+        first_name: staff.user.first_name,
+        last_name: staff.user.last_name,
+        business_id: staff.business_id,
+        email: staff.user.email,
+      });
+
+      setSelected(staff.role);
+      setImagePreview(staff.user.avatar ?? null);
+    } else {
+      reset({
+        first_name: "",
+        last_name: "",
+        business_id: "",
+        email: "",
+      });
+
+      setSelected("STAFF");
+      setImagePreview(null);
+      setRequirePasswordChange(false);
+    }
+  }, [staff, reset]);
 
   return (
     <div
@@ -131,7 +183,9 @@ const CreateStaffModal = ({ onClose, open }: Props) => {
       >
         <div className="flex items-center justify-between px-4 py-3 bg-[#fcf7ff] text-black">
           <div className="flex flex-col">
-            <h1 className="text-lg font-semibold">Create Staff Account</h1>
+            <h1 className="text-lg font-semibold">
+              {isEditMode ? "Update Staff Account" : "Create Staff Account"}
+            </h1>
 
             <p className="text-xs text-black/60">
               Add a new team member and configure their access.
@@ -155,7 +209,14 @@ const CreateStaffModal = ({ onClose, open }: Props) => {
               >
                 {imagePreview ? (
                   <img
-                    src={imagePreview}
+                    src={
+                      imagePreview
+                        ? imagePreview.startsWith("http") ||
+                          imagePreview.startsWith("blob:")
+                          ? imagePreview
+                          : `${import.meta.env.VITE_AVATAR_PREFIX}/${imagePreview}`
+                        : undefined
+                    }
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -239,7 +300,9 @@ const CreateStaffModal = ({ onClose, open }: Props) => {
 
           <div className="border border-gray-200 mt-8" />
 
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div
+            className={`mt-6 grid grid-cols-1 ${isEditMode ? "sm:grid-cols-1" : "sm:grid-cols-2"} gap-4`}
+          >
             <div>
               <h1 className="text-xs font-medium">Account Role</h1>
 
@@ -288,53 +351,53 @@ const CreateStaffModal = ({ onClose, open }: Props) => {
               </div>
             </div>
 
-            <div>
-              <h1 className="text-xs font-medium">Initial Password</h1>
+            {!isEditMode && (
+              <div>
+                <h1 className="text-xs font-medium">Initial Password</h1>
 
-              <div className="mt-5 relative">
-                <Input
-                  placeholder="Create a strong password"
-                  label=""
-                  type={showPassword ? "text" : "password"}
-                  {...register("password", {
-                    required: "Password is required",
-                    minLength: {
-                      value: 6,
-                      message: "Password must be at least 6 characters",
-                    },
-                  })}
-                />
+                <div className="mt-5 relative">
+                  <Input
+                    placeholder="Create a strong password"
+                    label=""
+                    type={showPassword ? "text" : "password"}
+                    {...register("password", {
+                      required: "Password is required",
+                      minLength: {
+                        value: 6,
+                        message: "Password must be at least 6 characters",
+                      },
+                    })}
+                  />
 
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black"
-                >
-                  {showPassword ? <EyeOff /> : <Eye />}
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 hover:text-black"
+                  >
+                    {showPassword ? <EyeOff /> : <Eye />}
+                  </button>
+                </div>
+
+                {errors.password && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
+
+                <div className="flex items-center gap-2 mt-4">
+                  <input
+                    type="checkbox"
+                    checked={requirePasswordChange}
+                    onChange={(e) => setRequirePasswordChange(e.target.checked)}
+                    className="accent-[#3525cc] cursor-pointer"
+                  />
+
+                  <p className="text-xs text-black/70">
+                    Require password change on first login
+                  </p>
+                </div>
               </div>
-
-              {errors.password && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.password.message}
-                </p>
-              )}
-
-              <div className="flex items-center gap-2 mt-4">
-                <input
-                  type="checkbox"
-                  checked={requirePasswordChange}
-                  onChange={(e) =>
-                    setRequirePasswordChange(e.target.checked)
-                  }
-                  className="accent-[#3525cc] cursor-pointer"
-                />
-
-                <p className="text-xs text-black/70">
-                  Require password change on first login
-                </p>
-              </div>
-            </div>
+            )}
           </div>
 
           <div className="border border-gray-200 mt-8" />
@@ -350,12 +413,16 @@ const CreateStaffModal = ({ onClose, open }: Props) => {
 
             <button
               type="submit"
-              disabled={createStaffMutation.isPending}
+              disabled={isSubmitting}
               className="px-4 py-2 text-sm bg-[#3525cc] text-white rounded-md hover:opacity-90 cursor-pointer disabled:opacity-50"
             >
-              {createStaffMutation.isPending
-                ? "Creating..."
-                : "Create Account"}
+              {isEditMode
+                ? isSubmitting
+                  ? "Saving..."
+                  : "Save Changes"
+                : isSubmitting
+                  ? "Creating..."
+                  : "Create Account"}
             </button>
           </div>
         </form>
@@ -365,118 +432,3 @@ const CreateStaffModal = ({ onClose, open }: Props) => {
 };
 
 export default CreateStaffModal;
-
-function AssignService() {
-  const [search, setSearch] = useState("");
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
-
-  const filteredServices = services.filter((item) =>
-    item.title.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  const handleToggle = (id: string) => {
-    setSelectedServices((prev) =>
-      prev.includes(id)
-        ? prev.filter((serviceId) => serviceId !== id)
-        : [...prev, id],
-    );
-  };
-
-  const handleRemove = (id: string) => {
-    setSelectedServices((prev) => prev.filter((item) => item !== id));
-  };
-
-  return (
-    <div className="mt-4 w-full">
-      <div className="flex justify-between">
-        <h1 className="text-xs font-medium">Assign Services</h1>
-
-        <p className="text-xs text-black/60">
-          {selectedServices.length > 0
-            ? `${selectedServices.length} selected `
-            : ""}
-        </p>
-      </div>
-
-      <div className="flex flex-col border mt-4 rounded-lg bg-[#f1edfa] border-gray-200 p-4 max-h-50 overflow-y-scroll">
-        <Search
-          placeHolder="Search services..."
-          className="bg-white text-sm"
-          value={search}
-          onChange={setSearch}
-        />
-
-        <div className="flex">
-          {selectedServices.length > 0 &&
-            selectedServices.map((item) => {
-              const serviceDetails = services.find(
-                (service) => item === service.id,
-              );
-
-              return (
-                <BannerService
-                  key={item}
-                  service_name={serviceDetails?.title!}
-                  onClick={() => handleRemove(item)}
-                />
-              );
-            })}
-        </div>
-
-        <div className="flex flex-col">
-          {filteredServices.length > 0 ? (
-            filteredServices.map((item) => {
-              const isChecked = selectedServices.includes(item.id);
-
-              return (
-                <label
-                  key={item.id}
-                  className={`flex items-center gap-3 rounded-md p-3 cursor-pointer transition ${
-                    isChecked
-                      ? ""
-                      : "border-transparent hover:border-gray-300"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => handleToggle(item.id)}
-                    className="accent-[#3525cc] cursor-pointer"
-                  />
-
-                  <p className="text-sm text-black">{item.title}</p>
-                </label>
-              );
-            })
-          ) : (
-            <div className="flex items-center justify-center py-6">
-              <p className="text-sm text-black/50">No services found.</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-type BannerServicePrps = {
-  onClick: () => void;
-  service_name: string;
-};
-
-function BannerService({
-  onClick,
-  service_name,
-}: BannerServicePrps) {
-  return (
-    <div className="flex items-center gap-2 border w-max px-2 rounded-full border-gray-300 bg-transparent m-2">
-      <h1 className="text-xs text-[#3525cc] font-medium">
-        {service_name}
-      </h1>
-
-      <button onClick={onClick} className="cursor-pointer">
-        <X className="w-4" />
-      </button>
-    </div>
-  );
-}
