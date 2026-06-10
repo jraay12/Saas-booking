@@ -46,7 +46,7 @@ const Sidebar = ({ data }: Props) => {
       </div>
 
       {/* MENU */}
-      <div className="flex flex-col gap-2 mt-6">
+      <div className="flex flex-col gap-2 mt-4">
         {data &&
           data.map((item: any) => (
             <NavLink
@@ -54,11 +54,11 @@ const Sidebar = ({ data }: Props) => {
               to={item.path}
               className={({ isActive }) =>
                 `
-                w-full flex items-center gap-3 px-4 py-3 rounded-xl
+                w-full flex items-center gap-3 px-4 py-2 rounded-xl
                 transition-all duration-200 cursor-pointer
                 ${
                   isActive
-                    ? "bg-[#edeaff] text-[#3525cc] font-medium border-r-5"
+                    ? "bg-[#edeaff] text-[#3525cc] font-medium "
                     : "text-black/60 hover:bg-gray-100"
                 }
               `
