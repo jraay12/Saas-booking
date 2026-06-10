@@ -59,6 +59,7 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
     description: "",
     duration: "",
     price: "",
+    hour: ""
   });
 
   // HANDLE CHANGE
@@ -101,6 +102,7 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
       serviceName: "",
       description: "",
       duration: "",
+      hour: "",
       price: "",
     });
 
@@ -124,7 +126,7 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
     formData.append("category", category);
     formData.append("description", form.description);
     formData.append("price", form.price);
-    formData.append("hour", "1");
+    formData.append("hour", form.hour);
     formData.append("minute", form.duration);
 
     if(selectedStaff.length > 0){
@@ -301,11 +303,20 @@ const CreateServiceModal = ({ onClose, open }: Props) => {
                 </div>
 
                 {/* DURATION + PRICE */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <Input
-                    label="Duration"
+                    label="Hour"
                     className="bg-white text-xs"
-                    placeholder="60 mins"
+                    placeholder="1 hr"
+                    type="text"
+                    name="hour"
+                    value={form.hour}
+                    onChange={handleChange}
+                  />
+                  <Input
+                    label="Minutes"
+                    className="bg-white text-xs"
+                    placeholder="59 mins"
                     type="text"
                     name="duration"
                     value={form.duration}
