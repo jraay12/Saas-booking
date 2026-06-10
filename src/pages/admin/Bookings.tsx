@@ -607,7 +607,7 @@ const Bookings = () => {
                     colSpan={6}
                     className="text-center py-16 text-[13px] text-zinc-400"
                   >
-                    Loading bookings…
+                    No Bookings
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
