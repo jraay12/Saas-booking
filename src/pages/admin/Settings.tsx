@@ -172,7 +172,11 @@ function BusinessHoursTab({
           updated.close_time &&
           updated.close_time < updated.open_time
         ) {
-          alert("Close time cannot be earlier than open time");
+          toast.error("Invalid Time Range", {
+            description: "Close time cannot be earlier than open time.",
+            richColors: true,
+            position: "top-right",
+          });
           return d;
         }
 
