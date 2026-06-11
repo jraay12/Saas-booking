@@ -4,15 +4,24 @@ import { STATUS_DONUT } from "../data/mockdata";
 /**
  * StatusDonutChart — doughnut chart breaking down bookings by status this month.
  */
-export default function StatusDonutChart() {
+interface StatusDonut {
+  labels: string[];
+  data: number[];
+  colors: string[];
+}
+
+interface Props {
+  STATUS_DONUT: StatusDonut;
+}
+export default function StatusDonutChart({STATUS_DONUT}: Props) {
   const { canvasRef } = useChart(() => ({
     type: "doughnut",
     data: {
-      labels: STATUS_DONUT.labels,
+      labels: STATUS_DONUT?.labels,
       datasets: [
         {
-          data: STATUS_DONUT.data,
-          backgroundColor: STATUS_DONUT.colors,
+          data: STATUS_DONUT?.data,
+          backgroundColor: STATUS_DONUT?.colors  ?? "black",
           borderWidth: 0,
           hoverOffset: 6,
         },

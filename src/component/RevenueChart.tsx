@@ -6,11 +6,24 @@ import { REVENUE_DATA } from "../data/mockdata";
  * RevenueChart — line chart showing daily/weekly revenue vs target.
  * Uses the `useChart` hook which imports Chart.js from npm (no CDN script tag).
  */
-export default function RevenueChart() {
+interface RevenueChart {
+  labels: string[];
+  revenue: number[];
+  target: number[];
+}
+
+interface Props {
+  REVENUE_DATA: {
+    "7d": RevenueChart;
+    "30d": RevenueChart;
+  };
+}
+export default function RevenueChart({ REVENUE_DATA }: Props) {
   const [period, setPeriod] = useState<keyof typeof REVENUE_DATA>("7d");
 
   const { canvasRef } = useChart(() => {
     const d = REVENUE_DATA[period];
+    console.log(d)
     return {
       type: "line",
       data: {
@@ -82,19 +95,21 @@ export default function RevenueChart() {
           </p>
         </div>
         <div className="flex gap-1.5">
-          {(["7d", "30d"] as Array<keyof typeof REVENUE_DATA>).map((p: keyof typeof REVENUE_DATA) => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              className={`text-[11px] px-3 py-1 rounded-full border transition-all ${
-                period === p
-                  ? "bg-indigo-50 border-indigo-200 text-indigo-700 font-semibold"
-                  : "border-zinc-200 text-zinc-400 hover:border-zinc-300"
-              }`}
-            >
-              {p}
-            </button>
-          ))}
+          {(["7d", "30d"] as Array<keyof typeof REVENUE_DATA>).map(
+            (p: keyof typeof REVENUE_DATA) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={`text-[11px] px-3 py-1 rounded-full border transition-all ${
+                  period === p
+                    ? "bg-indigo-50 border-indigo-200 text-indigo-700 font-semibold"
+                    : "border-zinc-200 text-zinc-400 hover:border-zinc-300"
+                }`}
+              >
+                {p}
+              </button>
+            ),
+          )}
         </div>
       </div>
 
