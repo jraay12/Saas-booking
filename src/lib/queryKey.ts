@@ -39,4 +39,6 @@ export const queryKeys = {
   profile: () => ["profile"],
 
   dashboard: () => ["dashboard"],
+
+  staff_dashboard: (staff_id: string) => ['staff-dashboard', staff_id]
 };
