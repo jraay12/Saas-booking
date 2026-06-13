@@ -12,6 +12,7 @@ import {
 import StatCard from "../../component/StatCard";
 import TodaySchedule from "../../component/TodaySchedule";
 import { useGetStaffDashboard } from "../../features/dashboard/dashboard.hook";
+import { useEffect, useState } from "react";
 
 const StatCardSkeleton = () => (
   <div className="rounded-2xl border border-zinc-100 bg-white p-4 animate-pulse">
@@ -59,6 +60,56 @@ const StaffDashboard = () => {
   const { user } = useAuth();
   const { data: dashboard, isLoading: dashboardLoading } =
     useGetStaffDashboard();
+  const [timeUntil, setTimeUntil] = useState("");
+
+  const todaySchedule = dashboard?.TODAY_SCHEDULE ?? [];
+  const nextAppointment = dashboard?.UPCOMING_BOOKING ?? null;
+
+  useEffect(() => {
+    if (!nextAppointment?.time) {
+      setTimeUntil("");
+      return;
+    }
+
+    const updateTime = () => {
+      const [hours, minutes] = nextAppointment.time.split(":").map(Number);
+
+      const appointmentDate = new Date();
+      appointmentDate.setHours(hours, minutes, 0, 0);
+
+      const diffMs = appointmentDate.getTime() - Date.now();
+
+      if (diffMs <= 0) {
+        setTimeUntil("Now");
+        return;
+      }
+
+      const totalSeconds = Math.floor(diffMs / 1000);
+
+      const hoursLeft = Math.floor(totalSeconds / 3600);
+      const minutesLeft = Math.floor((totalSeconds % 3600) / 60);
+      const secondsLeft = totalSeconds % 60;
+
+      const formatted = [
+        hoursLeft > 0 ? `${hoursLeft} ${hoursLeft === 1 ? "hr" : "hrs"}` : null,
+        minutesLeft > 0
+          ? `${minutesLeft} ${minutesLeft === 1 ? "min" : "mins"}`
+          : null,
+        `${secondsLeft} ${secondsLeft === 1 ? "sec" : "secs"}`,
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      setTimeUntil(formatted);
+    };
+
+    updateTime();
+
+    const interval = setInterval(updateTime, 1000);
+
+    return () => clearInterval(interval);
+  }, [nextAppointment?.time]);
+ 
 
   if (dashboardLoading) {
     return (
@@ -85,10 +136,6 @@ const StaffDashboard = () => {
       </div>
     );
   }
-
-  const todaySchedule = dashboard?.TODAY_SCHEDULE ?? [];
-  const nextAppointment = dashboard?.NEXT_APPOINTMENT ?? null;
-
   return (
     <div>
       <div className="py-4">
@@ -152,14 +199,18 @@ const StaffDashboard = () => {
           icon={<X size={18} className="text-red-600" strokeWidth={1.75} />}
         />
       </div>
-      <div className="mt-4 grid grid-rows-2 xl:grid-cols-4 gap-4">
-        <div className="xl:col-span-3 col-span-4">
+      <div className="mt-4 grid grid-cols-1 xl:grid-cols-4 gap-4">
+        <div className="xl:col-span-3">
           {todaySchedule.length > 0 ? (
             <TodaySchedule TODAY_SCHEDULE={todaySchedule} />
           ) : (
             <div className="rounded-2xl border border-zinc-100 bg-white p-8 flex flex-col items-center justify-center text-center h-full min-h-55">
               <div className="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center mb-3">
-                <CalendarDays size={18} className="text-indigo-500" strokeWidth={1.75} />
+                <CalendarDays
+                  size={18}
+                  className="text-indigo-500"
+                  strokeWidth={1.75}
+                />
               </div>
               <h3 className="text-sm font-semibold text-zinc-700">
                 No bookings scheduled today
@@ -171,27 +222,33 @@ const StaffDashboard = () => {
             </div>
           )}
         </div>
-        <div className="col-span-4 xl:col-span-1 bg-[#3525cc] rounded-2xl border border-zinc-100 shadow-sm row-span-2 p-4 flex flex-col">
+        <div className="xl:col-span-1 bg-[#3525cc] rounded-2xl border border-zinc-100 shadow-sm p-5 flex flex-col min-h-55">
           {nextAppointment ? (
-            <>
-              <h1 className="tracking-tight text-white/80 text-md">
-                Next appointment in
-              </h1>
-              <p className="text-white text-4xl font-bold tracking-tighter">
-                {nextAppointment.time_until}
-              </p>
-              <p className="text-white mt-4 text-sm">
-                {nextAppointment.customer_name} - {nextAppointment.service_name}
-              </p>
-              <button className="mt-auto w-full bg-white text-[#3525cc] text-sm font-semibold rounded-lg py-2.5 flex items-center justify-center gap-1.5 hover:bg-white/90 transition-colors">
+            <div className="flex flex-col gap-4 h-full justify-between">
+              <div>
+                <h1 className="tracking-tight text-white/80 text-sm">
+                  Next appointment in
+                </h1>
+                <p className="text-white text-3xl font-bold tracking-tighter mt-1">
+                  {timeUntil}
+                </p>
+                <p className="text-white/90 mt-2 text-sm">
+                  {nextAppointment.customer} - {nextAppointment.service_name}
+                </p>
+              </div>
+              <button className="w-full bg-white text-[#3525cc] text-sm font-semibold rounded-lg py-2.5 flex items-center justify-center gap-1.5 hover:bg-white/90 transition-colors">
                 View details
                 <ArrowRight size={14} strokeWidth={2} />
               </button>
-            </>
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center text-center h-full">
               <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center mb-3">
-                <CalendarX size={18} className="text-white" strokeWidth={1.75} />
+                <CalendarX
+                  size={18}
+                  className="text-white"
+                  strokeWidth={1.75}
+                />
               </div>
               <h3 className="text-sm font-semibold text-white">
                 No upcoming appointments
